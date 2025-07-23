@@ -1,27 +1,73 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Web, Desktop, Server.
+# 🧠 PALOMA: Proactive Mental Health Support App
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-    - `commonMain` is for code that’s common for all targets.
-    - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-      For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-      `iosMain` would be the right folder for such calls.
+> *Helping those who struggle connect with those who care — without needing to ask.*
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform,
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+## 📱 About the App
 
-* `/server` is for the Ktor server application.
+PALOMA is a mental health support app that empowers users to manage their emotional well-being and builds a bridge between them and their trusted contacts. Through a combination of **daily mood check-ins**, **medication tracking**, **a predictive algorithm**, and **automated notifications**, the app identifies early signs of emotional distress and gently alerts the user's support network when help is most needed.
 
-* `/shared` is for the code that will be shared between all targets in the project.
-  The most important subfolder is `commonMain`. If preferred, you can add code to the platform-specific folders here
-  too.
+This app was born from personal experience and designed with compassion at its core.
 
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html),
-[Compose Multiplatform](https://github.com/JetBrains/compose-multiplatform/#compose-multiplatform),
-[Kotlin/Wasm](https://kotl.in/wasm/)…
+---
 
-We would appreciate your feedback on Compose/Web and Kotlin/Wasm in the public Slack
-channel [#compose-web](https://slack-chats.kotlinlang.org/c/compose-web).
-If you face any issues, please report them on [YouTrack](https://youtrack.jetbrains.com/newIssue?project=CMP).
+## 🔑 Core Features
+
+### ✅ Daily Check-Ins
+Users log scores for:
+- Mood
+- Energy
+- Motivation
+- Suicidal Thoughts (optional)
+
+Scores are tracked over time to detect downward trends and trigger support mechanisms.
+
+### 💊 Medication Tracker
+Gently reminds users to take their medication and logs adherence. Missed doses can factor into alerting.
+
+### 🔔 Trusted Contact Notifications
+Users assign trusted contacts who are automatically notified when concerning patterns are detected. Each contact can receive a personalized note written by the user, guiding their response.
+
+### 🧠 Predictive Algorithm
+Using historical check-in and med log data, the app anticipates depressive episodes and enables early intervention. This allows users to prepare proactively, increasing the chances of positive coping outcomes.
+
+---
+
+## 🧩 Architecture Overview
 
 You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
+
+The backend is responsible for user management, data storage, and the logic that powers notification triggering and analytics.
+
+---
+
+## 🧾 Database Schema
+
+Key tables include:
+- `users` — user accounts
+- `auth`, `auth_credentials` — secure login and token management
+- `daily_checkins` — mood and mental health tracking
+- `medications`, `med_logs` — medication tracking
+- `trusted_contacts` — designated support network
+- `alerts` — records of triggered notifications
+- `score_history` — longitudinal data for AI models
+
+See the [`MENTAL HEALTH - Database Schema`](PALOMA%20API_DIAGRAM.png) PDF for full entity relationships.
+
+---
+
+## 📊 API Design
+
+The API supports:
+- Authentication (register/login/logout)
+- Daily check-ins and med tracking
+- Notification triggering and alerting
+- Trusted contact management
+
+See the [`PALOMA API Diagram`](./PALOMA%20API_DIAGRAM.png) for full sequence interactions    
+See the [`PALOMA Database Schema`](./MENTAL_HEALTH-Database_Schema.pdf) for schema.
+---
+
+## 📜 License
+
+All rights reserved.
+This project is proprietary and not open for reuse, reproduction, or modification without written permission. 
