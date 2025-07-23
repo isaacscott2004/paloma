@@ -51,11 +51,13 @@ Key tables include:
 - `alerts` — records of triggered notifications
 - `score_history` — longitudinal data for AI models
 
-See the [`MENTAL HEALTH - Database Schema`](PALOMA%20API_DIAGRAM.png) PDF for full entity relationships.
+See the [`MENTAL HEALTH - Database Schema`](./MENTAL_HEALTH-Database_Schema.pdf) PDF for full entity relationships.
 
 ---
 
 ## 📊 API Design
+
+See the [`PALOMA API Diagram`](./PALOMA%20API_DIAGRAM.png) for full sequence interactions
 
 The API supports:
 - Authentication (register/login/logout)
@@ -63,8 +65,6 @@ The API supports:
 - Notification triggering and alerting
 - Trusted contact management
 
-See the [`PALOMA API Diagram`](./PALOMA%20API_DIAGRAM.png) for full sequence interactions    
-See the [`PALOMA Database Schema`](./MENTAL_HEALTH-Database_Schema.pdf) for schema.
 ---
 
 ## 📜 License
