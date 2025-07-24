@@ -19,6 +19,7 @@ ktor = "3.2.0"
 logback = "1.5.18"
 
 [libraries]
+boot-spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
 boot-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 junit-platform-launcher = { module = "org.junit.platform:junit-platform-launcher" }
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -39,12 +40,17 @@ ktor-serverNetty = { module = "io.ktor:ktor-server-netty-jvm", version.ref = "kt
 ktor-serverTestHost = { module = "io.ktor:ktor-server-test-host-jvm", version.ref = "ktor" }
 lombok = { module = "org.projectlombok:lombok" }
 mysql-connector-j = { module = "com.mysql:mysql-connector-j" }
+mysql-mysql-connector-j = { module = "mysql:mysql-connector-j" }
+org-projectlombok-lombok = { module = "org.projectlombok:lombok" }
+org-projectlombok-lombok2 = { module = "org.projectlombok:lombok" }
 projectlombok-lombok = { module = "org.projectlombok:lombok" }
 spring-boot-devtools = { module = "org.springframework.boot:spring-boot-devtools" }
 spring-boot-starter-oauth2-authorization-server = { module = "org.springframework.boot:spring-boot-starter-oauth2-authorization-server" }
 spring-boot-starter-oauth2-client = { module = "org.springframework.boot:spring-boot-starter-oauth2-client" }
 spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
+spring-boot-starter-web = { module = "org.springframework.boot:spring-boot-starter-web" }
 spring-security-test = { module = "org.springframework.security:spring-security-test" }
+springframework-spring-boot-starter-test = { module = "org.springframework.boot:spring-boot-starter-test" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
