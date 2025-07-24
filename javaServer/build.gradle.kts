@@ -18,9 +18,10 @@ repositories {
 }
 
 dependencies {
-	implementation("org.springframework.boot:spring-boot-starter-web")
-	developmentOnly("org.springframework.boot:spring-boot-devtools")
-	compileOnly("org.projectlombok:lombok")
-	annotationProcessor("org.projectlombok:lombok")
-	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation(libs.spring.boot.starter.web)
+	developmentOnly(libs.boot.spring.boot.devtools)
+	compileOnly(libs.org.projectlombok.lombok)
+	annotationProcessor(libs.org.projectlombok.lombok2)
+	testImplementation(libs.springframework.spring.boot.starter.test)
+	implementation(libs.mysql.mysql.connector.j)
 }
