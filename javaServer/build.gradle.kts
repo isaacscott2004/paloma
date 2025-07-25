@@ -19,8 +19,13 @@ repositories {
 
 dependencies {
 	implementation(libs.spring.boot.starter.web)
+	implementation(libs.spring.boot.starter.data.jpa)
 	developmentOnly(libs.boot.spring.boot.devtools)
 	compileOnly(libs.org.projectlombok.lombok)
 	annotationProcessor(libs.org.projectlombok.lombok2)
 	testImplementation(libs.springframework.spring.boot.starter.test)
-	implementation("mysql:mysql-connector-java:8.0.33")}
+	implementation("mysql:mysql-connector-java:8.0.33")
+	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+	implementation("org.springframework.boot:spring-boot-starter-validation")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+}
