@@ -1,4 +1,4 @@
-package com.paloma.paloma.javaServer.model;
+package com.paloma.paloma.javaServer.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
