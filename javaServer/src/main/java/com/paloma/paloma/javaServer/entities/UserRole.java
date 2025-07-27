@@ -1,4 +1,4 @@
-package com.paloma.paloma.javaServer.model;
+package com.paloma.paloma.javaServer.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -26,6 +26,7 @@ public class UserRole {
     @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
-    @Column(name = "primary")
+    @Column(name = "is_primary")
     private Boolean primary;
+
 }

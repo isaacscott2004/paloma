@@ -1,8 +1,7 @@
-package com.paloma.paloma.javaServer.model;
+package com.paloma.paloma.javaServer.entities;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,10 +22,10 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
 
-    @NotBlank(message = "Role name is required")
-    @Size(max = 100, message = "Role name must be less than 100 characters")
+    @Enumerated(EnumType.STRING)
+    @NotBlank(message = "Role is required")
     @Column(nullable = false)
-    private String name;
+    private RoleType roleType;
 
     @Column(name = "serial")
     private Integer serial;
