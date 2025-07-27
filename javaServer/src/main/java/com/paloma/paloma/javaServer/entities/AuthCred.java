@@ -25,10 +25,6 @@ public class AuthCred {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "auth_id", nullable = false)
-    private Auth auth;
-
     @NotBlank(message = "Password hash is required")
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
