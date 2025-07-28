@@ -1,24 +1,26 @@
 package com.paloma.paloma.javaServer.services;
 
-import com.paloma.paloma.javaServer.dataTransferObjects.UserDTO;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
 import com.paloma.paloma.javaServer.entities.AuthCred;
-import com.paloma.paloma.javaServer.entities.RoleType;
+import com.paloma.paloma.javaServer.entities.Role;
 import com.paloma.paloma.javaServer.entities.User;
+import com.paloma.paloma.javaServer.entities.UserRole;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
 import com.paloma.paloma.javaServer.repositories.AuthCredRepository;
+import com.paloma.paloma.javaServer.repositories.RoleRepository;
 import com.paloma.paloma.javaServer.repositories.UserRepository;
+import com.paloma.paloma.javaServer.repositories.UserRoleRepository;
 import com.paloma.paloma.javaServer.utilites.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import static com.paloma.paloma.javaServer.entities.enums.RoleType.USER;
 
 @Service
 @RequiredArgsConstructor
@@ -31,22 +33,44 @@ public class UserService {
 
     private final PasswordEncoder passwordEncoder;
 
+    private final RoleRepository roleRepository;
 
-    public RegisterResponse register(RegisterRequest request) throws UserException {
-        User user = request.getUser();
-        if (userRepository.existsByEmail(user.getEmail())){
-            throw new UserException("There is already an account with the email address: " + user.getEmail());
-        }
-        if (userRepository.existsByPhone(user.getPhone())){
-            throw new UserException("There is already an account with the phone number: " + user.getPhone());
-        }
-        if (userRepository.existsByUsername(user.getUsername())){
-            throw new UserException("There is already an account with the username: " + user.getUsername());
-        }
-        User savedUser = userRepository.save(user);
-        UserDTO userDTO = convertToDTO(savedUser);
-        return new RegisterResponse(userDTO);
+    private final UserRoleRepository userRoleRepository;
+
+
+public RegisterResponse register(RegisterRequest request) throws UserException {
+    User user = new User();
+    user.setUsername(request.getUsername());
+    user.setEmail(request.getEmail());
+    user.setPhone(request.getPhone());
+    user.setFullName(request.getFullName());
+
+    if (userRepository.existsByEmail(user.getEmail())){
+        throw new UserException("There is already an account with the email address: " + user.getEmail());
     }
+    if (userRepository.existsByPhone(user.getPhone())){
+        throw new UserException("There is already an account with the phone number: " + user.getPhone());
+    }
+    if (userRepository.existsByUsername(user.getUsername())){
+        throw new UserException("There is already an account with the username: " + user.getUsername());
+    }
+    user.setCreatedAt(java.time.LocalDateTime.now());
+    userRepository.save(user);
+
+    Role role = new Role();
+    role.setRoleType(request.getRoleType());
+    roleRepository.save(role);
+
+    UserRole userRole = new UserRole();
+    boolean primary = request.getRoleType().equals(USER);
+    userRole.setUser(user);
+    userRole.setRole(role);
+    userRole.setPrimary(primary);
+    userRoleRepository.save(userRole);
+
+
+    return new RegisterResponse(user);
+}
 
 
 public LoginResponse login(LoginRequest request) throws AuthenticationException {
@@ -59,25 +83,7 @@ public LoginResponse login(LoginRequest request) throws AuthenticationException 
     }
     user.setLastLogin(java.time.LocalDateTime.now());
     userRepository.save(user);
-    return new LoginResponse(convertToDTO(user), JwtUtil.generateToken(user.getId()));
+    return new LoginResponse(JwtUtil.generateToken(user.getId()));
 }
-
-
-    private UserDTO convertToDTO(User user){
-        UserDTO userDTO = new UserDTO();
-        userDTO.setId(user.getId());
-        userDTO.setEmail(user.getEmail());
-        userDTO.setUsername(user.getUsername());
-        userDTO.setPhone(user.getPhone());
-        userDTO.setCreatedAt(user.getCreatedAt());
-        userDTO.setLastLogin(user.getLastLogin());
-
-        if(user.getUserRoles() != null && !user.getUserRoles().isEmpty()){
-            List<RoleType> roles = user.getUserRoles().stream().map(ur -> ur.getRole().getRoleType()).toList();
-            userDTO.setRoles(roles);
-        }
-        return userDTO;
-    }
-
 
 }

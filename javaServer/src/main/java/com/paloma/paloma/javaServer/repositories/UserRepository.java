@@ -1,6 +1,6 @@
 package com.paloma.paloma.javaServer.repositories;
 
-import com.paloma.paloma.javaServer.entities.RoleType;
+import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import com.paloma.paloma.javaServer.entities.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

@@ -1,5 +1,6 @@
 package com.paloma.paloma.javaServer.entities;
 
+import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
