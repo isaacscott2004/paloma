@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-public class LoginController {
+public class AuthController {
     private static final String INVALID_CREDENTIALS_MESSAGE = "Invalid credentials";
 
     private final UserService userService;
 
-    public LoginController(UserService userService) {
+    public AuthController(UserService userService) {
         this.userService = userService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
         try {
-            String token = userService.login(request).getToken();
+            String token = userService.login(request).getAuthToken();
             return ResponseEntity.ok(new JwtResponse(token));
         } catch (AuthenticationException e) {
             return ResponseEntity
@@ -33,5 +33,7 @@ public class LoginController {
                     .body(new JwtResponse(INVALID_CREDENTIALS_MESSAGE));
         }
     }
+
+
 }
 

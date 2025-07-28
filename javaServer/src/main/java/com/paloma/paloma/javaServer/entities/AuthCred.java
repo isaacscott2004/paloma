@@ -23,16 +23,15 @@ public class AuthCred {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    User user;
 
     @NotBlank(message = "Password hash is required")
     @Column(name = "password_hash", nullable = false)
     private String passwordHash;
 
-    @Column(name = "method")
-    private String method;
-
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
+
+
 }
