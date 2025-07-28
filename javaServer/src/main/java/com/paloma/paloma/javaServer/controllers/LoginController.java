@@ -3,7 +3,7 @@ package com.paloma.paloma.javaServer.controllers;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
-import com.paloma.paloma.javaServer.services.AuthenticationService;
+import com.paloma.paloma.javaServer.services.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,19 +13,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/auth")
-public class AuthController {
+public class LoginController {
     private static final String INVALID_CREDENTIALS_MESSAGE = "Invalid credentials";
 
-    private final AuthenticationService authenticationService;
+    private final UserService userService;
 
-    public AuthController(AuthenticationService authenticationService) {
-        this.authenticationService = authenticationService;
+    public LoginController(UserService userService) {
+        this.userService = userService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
         try {
-            String token = authenticationService.authenticateUser(request);
+            String token = userService.login(request).getToken();
             return ResponseEntity.ok(new JwtResponse(token));
         } catch (AuthenticationException e) {
             return ResponseEntity
