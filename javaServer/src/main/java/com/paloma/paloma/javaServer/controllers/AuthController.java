@@ -78,13 +78,18 @@ public class AuthController {
     public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshRequest request) {
         String refreshToken = request.getRefreshToken();
 
-
-        return refreshService.validate(refreshToken)
-                .map(user -> {
-                    String newAccessToken = jwtUtil.generateAccessToken(user.getId());
-                    return ResponseEntity.ok(new JwtResponse(newAccessToken));
-                })
-                .orElseThrow(() -> new AuthenticationException("Invalid refresh token"));
+        try {
+            return refreshService.validate(refreshToken)
+                    .map(user -> {
+                        String newAccessToken = jwtUtil.generateAccessToken(user.getId());
+                        return ResponseEntity.ok(new JwtResponse(newAccessToken));
+                    })
+                    .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                            .body(new JwtResponse("Invalid refresh token")));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new JwtResponse("Invalid refresh token"));
+        }
     }
 
 

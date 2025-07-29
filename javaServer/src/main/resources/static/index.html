@@ -23,34 +23,41 @@
     <tr>
         <td class="endpoint" onclick="register()">
             <div class="method">[POST]</div>
-            <div class="path">/user</div>
+            <div class="path">/auth/register</div>
         </td>
         <td>
-            <span class="description">Register a user</span> If successful, an authorization authToken is returned. You
-            may use the authToken with future requests that require authorization. No authorization authToken is required
-            to call this endpoint.
+            <span class="description">Register a user</span> Creates a new user account. Returns user data on success.
+            No authorization token required.
         </td>
     </tr>
     <tr>
         <td class="endpoint" onclick="login()">
             <div class="method">[POST]</div>
-            <div class="path">/session</div>
+            <div class="path">/auth/login</div>
         </td>
         <td>
-            <span class="description">Log in a user</span> If successful, an authorization authToken is returned. You
-            may
-            use the authToken with future requests that require authorization. No authorization authToken is required to
-            call this endpoint.
+            <span class="description">Log in a user</span> Authenticates user and returns JWT access and refresh tokens.
+            No authorization token required.
         </td>
     </tr>
     <tr>
         <td class="endpoint" onclick="logout()">
-            <div class="method">[DELETE]</div>
-            <div class="path">/session</div>
+            <div class="method">[POST]</div>
+            <div class="path">/auth/logout</div>
         </td>
         <td>
-            <span class="description">Logs out an authenticated user</span> An authToken is required to call this
-            endpoint.
+            <span class="description">Logs out an authenticated user</span> Revokes all refresh tokens for the user.
+            Requires user object in request body.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="refresh()">
+            <div class="method">[POST]</div>
+            <div class="path">/auth/refresh</div>
+        </td>
+        <td>
+            <span class="description">Refresh access token</span> Uses refresh token to generate a new access token.
+            Requires valid refresh token in request body.
         </td>
     </tr>
     <tr>

@@ -51,7 +51,20 @@ function send(path, params, method) {
     })
     .then((data) => {
       if(data) {
-        document.getElementById('authToken').value = authToken = data.authToken || authToken;
+        // Handle JWT authentication responses
+        if (data.accessAuthToken) {
+          document.getElementById('authToken').value = authToken = "Bearer " + data.accessAuthToken;
+        } else if (data.token) {
+          document.getElementById('authToken').value = authToken = "Bearer " + data.token;
+        } else {
+          document.getElementById('authToken').value = authToken = data.authToken || authToken;
+        }
+        
+        // Store refresh token for later use
+        if (data.refreshAuthToken) {
+          localStorage.setItem('refreshToken', data.refreshAuthToken);
+        }
+        
         gameID = data.gameID || gameID;
       }
       const response = (data === "") ? "Empty response body" : JSON.stringify(data, null, 2);
@@ -75,13 +88,29 @@ function clearAll() {
   displayRequest('DELETE', '/db', null);
 }
 function register() {
-  displayRequest('POST', '/user', { username: 'username', password: 'password', email: 'email' });
+  displayRequest('POST', '/auth/register', { 
+    username: 'testuser', 
+    password: 'password123', 
+    email: 'test@example.com',
+    phone: '+1234567890',
+    fullName: 'Test User',
+    roleType: 'USER'
+  });
 }
 function login() {
-  displayRequest('POST', '/session', { username: 'username', password: 'password' });
+  displayRequest('POST', '/auth/login', { 
+    emailOrUsername: 'testuser', 
+    password: 'password123' 
+  });
 }
 function logout() {
-  displayRequest('DELETE', '/session', null);
+  displayRequest('POST', '/auth/logout', { user: { id: 'user-id-here' } });
+}
+function refresh() {
+  const storedRefreshToken = localStorage.getItem('refreshToken');
+  displayRequest('POST', '/auth/refresh', { 
+    refreshToken: storedRefreshToken || 'refresh-token-here' 
+  });
 }
 function dailyCheckIn() {
   displayRequest('POST', '/loggedIn', {scoreOne: 'scoreOne', scoreTwo: 'scoreTwo',
