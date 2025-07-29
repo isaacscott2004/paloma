@@ -65,6 +65,16 @@ function send(path, params, method) {
           localStorage.setItem('refreshToken', data.refreshAuthToken);
         }
         
+        // Store user ID for role management functions
+        if (data.userId) {
+          localStorage.setItem('userId', data.userId);
+        }
+        
+        // For register responses, extract user ID from nested user object
+        if (data.user && data.user.id) {
+          localStorage.setItem('userId', data.user.id);
+        }
+        
         gameID = data.gameID || gameID;
       }
       const response = (data === "") ? "Empty response body" : JSON.stringify(data, null, 2);
@@ -111,6 +121,36 @@ function refresh() {
   displayRequest('POST', '/auth/refresh', { 
     refreshToken: storedRefreshToken || 'refresh-token-here' 
   });
+}
+
+// Role Management Functions
+function makeTrustedContact() {
+  const storedUserId = localStorage.getItem('userId');
+  displayRequest('POST', `/api/roles/make-trusted-contact/${storedUserId || 'user-id-here'}`, null);
+}
+
+function getUserRoles() {
+  const storedUserId = localStorage.getItem('userId');
+  displayRequest('GET', `/api/roles/user/${storedUserId || 'user-id-here'}`, null);
+}
+
+function checkBothRoles() {
+  const storedUserId = localStorage.getItem('userId');
+  displayRequest('GET', `/api/roles/check/${storedUserId || 'user-id-here'}/has-both-roles`, null);
+}
+
+function addRole() {
+  const storedUserId = localStorage.getItem('userId');
+  displayRequest('POST', '/api/roles/add', {
+    userId: storedUserId || 'user-id-here',
+    roleType: 'TRUSTED_CONTACT',
+    isPrimary: false
+  });
+}
+
+function removeRole() {
+  const storedUserId = localStorage.getItem('userId');
+  displayRequest('DELETE', `/api/roles/remove/${storedUserId || 'user-id-here'}/TRUSTED_CONTACT`, null);
 }
 function dailyCheckIn() {
   displayRequest('POST', '/loggedIn', {scoreOne: 'scoreOne', scoreTwo: 'scoreTwo',
