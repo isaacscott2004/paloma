@@ -4,16 +4,10 @@ import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
-import com.paloma.paloma.javaServer.entities.AuthCred;
-import com.paloma.paloma.javaServer.entities.Role;
-import com.paloma.paloma.javaServer.entities.User;
-import com.paloma.paloma.javaServer.entities.UserRole;
+import com.paloma.paloma.javaServer.entities.*;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
-import com.paloma.paloma.javaServer.repositories.AuthCredRepository;
-import com.paloma.paloma.javaServer.repositories.RoleRepository;
-import com.paloma.paloma.javaServer.repositories.UserRepository;
-import com.paloma.paloma.javaServer.repositories.UserRoleRepository;
+import com.paloma.paloma.javaServer.repositories.*;
 import com.paloma.paloma.javaServer.utilites.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +30,11 @@ public class UserService {
     private final RoleRepository roleRepository;
 
     private final UserRoleRepository userRoleRepository;
+
+    private final RefreshAuthRepository refreshAuthRepository;
+
+    private final JwtUtil jwtUtil;
+
 
 
 public RegisterResponse register(RegisterRequest request) throws UserException {
@@ -68,7 +67,6 @@ public RegisterResponse register(RegisterRequest request) throws UserException {
     userRole.setPrimary(primary);
     userRoleRepository.save(userRole);
 
-
     return new RegisterResponse(user);
 }
 
@@ -83,7 +81,19 @@ public LoginResponse login(LoginRequest request) throws AuthenticationException 
     }
     user.setLastLogin(java.time.LocalDateTime.now());
     userRepository.save(user);
-    return new LoginResponse(JwtUtil.generateToken(user.getId()));
+    String refreshToken = jwtUtil.generateRefreshToken(user.getId());
+    RefreshAuth refreshAuth = new RefreshAuth();
+    refreshAuth.setUser(user);
+    refreshAuth.setToken(refreshToken);
+    refreshAuth.setExpiryDate(refreshAuth.getExpiryDate());
+    refreshAuthRepository.save(refreshAuth);
+    return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), jwtUtil.generateRefreshToken(user.getId()));
 }
+
+
+
+//public LogoutResponse logout(LogoutRequest request){
+//
+//}
 
 }
