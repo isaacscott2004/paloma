@@ -25,6 +25,7 @@ public class JwtUtil {
     }
     public String generateAccessToken(UUID userId) {
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(userId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + ACCESS_EXPIRATION_TIME_MS))
@@ -34,6 +35,7 @@ public class JwtUtil {
 
     public  String generateRefreshToken(UUID userId) {
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(userId.toString())
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + REFRESH_EXPIRATION_TIME_MS))
@@ -42,6 +44,10 @@ public class JwtUtil {
     }
 
     public UUID validateTokenAndGetUserId(String token) throws JwtException {
+        if (token == null || token.isBlank()) {
+            throw new JwtException("Empty or null token");
+        }
+
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

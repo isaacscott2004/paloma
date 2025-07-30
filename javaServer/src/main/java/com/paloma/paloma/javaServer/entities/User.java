@@ -35,9 +35,9 @@ public class User {
     private String email;
 
     @NotBlank(message = "Phone number is required")
-    @Size(max = 15, message = "Phone number must be less than 15 digits")
+    @Size(max = 20, message = "Phone number must be less than 20 digits")
     @Column(unique = true, nullable = false)
-    private Integer phone;
+    private String phone;
 
 
     @Size(max = 100, message = "Full name must be less than 100 characters")
