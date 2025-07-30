@@ -3,6 +3,7 @@ package com.paloma.paloma.javaServer.entities;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -24,7 +25,7 @@ public class Role {
     private UUID id;
 
     @Enumerated(EnumType.STRING)
-    @NotBlank(message = "Role is required")
+    @NotNull(message = "Role is required")
     @Column(nullable = false)
     private RoleType roleType;
 

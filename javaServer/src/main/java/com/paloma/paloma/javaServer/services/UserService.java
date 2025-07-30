@@ -54,7 +54,12 @@ public RegisterResponse register(RegisterRequest request) throws UserException {
         throw new UserException("There is already an account with the username: " + user.getUsername());
     }
     user.setCreatedAt(java.time.LocalDateTime.now());
-    userRepository.save(user);
+    try {
+        userRepository.save(user);
+    } catch (Exception e) {
+        e.printStackTrace(); // Important
+        throw new RuntimeException("User save failed: " + e.getMessage());
+    }
 
     Role role = new Role();
     role.setRoleType(request.getRoleType());
