@@ -85,15 +85,11 @@ public LoginResponse login(LoginRequest request) throws AuthenticationException 
     RefreshAuth refreshAuth = new RefreshAuth();
     refreshAuth.setUser(user);
     refreshAuth.setToken(refreshToken);
-    refreshAuth.setExpiryDate(refreshAuth.getExpiryDate());
+    refreshAuth.setExpiryDate(java.time.LocalDateTime.now().plusDays(7));
     refreshAuthRepository.save(refreshAuth);
-    return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), jwtUtil.generateRefreshToken(user.getId()));
+    return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), refreshToken);
 }
 
 
-
-//public LogoutResponse logout(LogoutRequest request){
-//
-//}
 
 }

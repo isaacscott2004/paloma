@@ -32,4 +32,10 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
 	implementation("com.google.api-client:google-api-client:2.5.0")
+	testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
+	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+}
+tasks.test {
+	useJUnitPlatform()
 }

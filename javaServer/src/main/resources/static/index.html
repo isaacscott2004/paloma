@@ -12,8 +12,8 @@
 <body>
 <h1>PALOMA Test API Server</h1>
 <p>
-    My app API test platform is described below. Some of the APIs require a request body to be sent (like
-    <code>/user/login</code> and <code>/user/register</code>), while others require an Authorization authToken
+    My app API test platform is described below. Some APIs require a request body to be sent (like
+    <code>/auth/login</code> and <code>/auth/register</code>), while others require an Authorization authToken
     (received at login). To view the required JSON format, click on a command below and look at the example request
     body. To try out an API, modify the request as needed, and press Send.
 </p>
@@ -23,34 +23,41 @@
     <tr>
         <td class="endpoint" onclick="register()">
             <div class="method">[POST]</div>
-            <div class="path">/user</div>
+            <div class="path">/auth/register</div>
         </td>
         <td>
-            <span class="description">Register a user</span> If successful, an authorization authToken is returned. You
-            may use the authToken with future requests that require authorization. No authorization authToken is required
-            to call this endpoint.
+            <span class="description">Register a user</span> Creates a new user account. Returns user data on success.
+            No authorization token required.
         </td>
     </tr>
     <tr>
         <td class="endpoint" onclick="login()">
             <div class="method">[POST]</div>
-            <div class="path">/session</div>
+            <div class="path">/auth/login</div>
         </td>
         <td>
-            <span class="description">Log in a user</span> If successful, an authorization authToken is returned. You
-            may
-            use the authToken with future requests that require authorization. No authorization authToken is required to
-            call this endpoint.
+            <span class="description">Log in a user</span> Authenticates user and returns JWT access and refresh tokens.
+            No authorization token required.
         </td>
     </tr>
     <tr>
         <td class="endpoint" onclick="logout()">
-            <div class="method">[DELETE]</div>
-            <div class="path">/session</div>
+            <div class="method">[POST]</div>
+            <div class="path">/auth/logout</div>
         </td>
         <td>
-            <span class="description">Logs out an authenticated user</span> An authToken is required to call this
-            endpoint.
+            <span class="description">Logs out an authenticated user</span> Revokes all refresh tokens for the user.
+            Requires user object in request body.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="refresh()">
+            <div class="method">[POST]</div>
+            <div class="path">/auth/refresh</div>
+        </td>
+        <td>
+            <span class="description">Refresh access token</span> Uses refresh token to generate a new access token.
+            Requires valid refresh token in request body.
         </td>
     </tr>
     <tr>
@@ -151,6 +158,52 @@
         <td>
             <span class="description">Clear ALL data from the database</span> No
             authorization authToken is required.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="makeTrustedContact()">
+            <div class="method">[POST]</div>
+            <div class="path">/api/roles/make-trusted-contact/{userId}</div>
+        </td>
+        <td>
+            <span class="description">Make user a trusted contact</span> Adds TRUSTED_CONTACT role to an existing user.
+            User will have both USER and TRUSTED_CONTACT roles.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="getUserRoles()">
+            <div class="method">[GET]</div>
+            <div class="path">/api/roles/user/{userId}</div>
+        </td>
+        <td>
+            <span class="description">Get user roles</span> Returns all roles assigned to a user and their primary role.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="checkBothRoles()">
+            <div class="method">[GET]</div>
+            <div class="path">/api/roles/check/{userId}/has-both-roles</div>
+        </td>
+        <td>
+            <span class="description">Check if user has both roles</span> Returns true if user has both USER and TRUSTED_CONTACT roles.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="addRole()">
+            <div class="method">[POST]</div>
+            <div class="path">/api/roles/add</div>
+        </td>
+        <td>
+            <span class="description">Add role to user</span> Adds a specific role to an existing user. Can specify if it should be primary.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="removeRole()">
+            <div class="method">[DELETE]</div>
+            <div class="path">/api/roles/remove/{userId}/{roleType}</div>
+        </td>
+        <td>
+            <span class="description">Remove role from user</span> Removes a specific role from a user. Cannot remove the last role.
         </td>
     </tr>
 </table>
