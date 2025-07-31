@@ -42,22 +42,23 @@
     </tr>
     <tr>
         <td class="endpoint" onclick="logout()">
-            <div class="method">[POST]</div>
-            <div class="path">/auth/logout</div>
+            <div class="method">[DELETE]</div>
+            <div class="path">/insession/logout</div>
         </td>
         <td>
             <span class="description">Logs out an authenticated user</span> Revokes all refresh tokens for the user.
-            Requires user object in request body.
+            An authorization token is required. No request body is needed as the system uses the access token 
+            to identify the user and revoke all their refresh tokens.
         </td>
     </tr>
     <tr>
         <td class="endpoint" onclick="refresh()">
             <div class="method">[POST]</div>
-            <div class="path">/auth/refresh</div>
+            <div class="path">/insession/refresh</div>
         </td>
         <td>
             <span class="description">Refresh access token</span> Uses refresh token to generate a new access token.
-            Requires valid refresh token in request body.
+            An authorization token is required. Requires valid refresh token in request body.
         </td>
     </tr>
     <tr>

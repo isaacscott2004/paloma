@@ -2,7 +2,6 @@ package com.paloma.paloma.javaServer.entities;
 
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -28,9 +27,6 @@ public class Role {
     @NotNull(message = "Role is required")
     @Column(nullable = false)
     private RoleType roleType;
-
-    @Column(name = "serial")
-    private Integer serial;
 
     //Relationships
     @OneToMany(mappedBy = "role", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

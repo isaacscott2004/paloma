@@ -131,10 +131,14 @@ function login() {
   });
 }
 function logout() {
-  displayRequest('POST', '/auth/logout', { user: { id: 'user-id-here' } });
+  // Option 1: Send the refresh token in the request body (original behavior)
+  // displayRequest('DELETE', '/insession/logout', { refreshToken: localStorage.getItem('refreshToken') || 'refresh-token-here' });
+  
+  // Option 2: Send an empty request body, relying on the access token in the Authorization header
+  displayRequest('DELETE', '/insession/logout');
 }
 function refresh() {
-  displayRequest('POST', '/auth/refresh', {
+  displayRequest('POST', '/insession/refresh', {
     refreshToken: localStorage.getItem('refreshToken') || 'refresh-token-here'
   });
 }
