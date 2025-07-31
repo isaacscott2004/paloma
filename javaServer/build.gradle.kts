@@ -20,6 +20,7 @@ repositories {
 dependencies {
 	implementation(libs.spring.boot.starter.web)
 	implementation(libs.spring.boot.starter.data.jpa)
+	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	developmentOnly(libs.boot.spring.boot.devtools)
 	compileOnly(libs.org.projectlombok.lombok)
 	annotationProcessor(libs.org.projectlombok.lombok2)
@@ -31,7 +32,6 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
-	implementation("com.google.api-client:google-api-client:2.5.0")
 	testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
