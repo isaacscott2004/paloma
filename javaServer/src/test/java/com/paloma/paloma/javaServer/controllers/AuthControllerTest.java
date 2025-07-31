@@ -3,8 +3,6 @@ package com.paloma.paloma.javaServer.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.LogoutRequest;
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.RefreshRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
@@ -30,7 +28,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -39,7 +36,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 
 @ExtendWith(MockitoExtension.class)
 public class AuthControllerTest {
@@ -152,56 +148,7 @@ public class AuthControllerTest {
         verify(userService).login(any(LoginRequest.class));
     }
 
-    @Test
-    void testLogoutSuccess() throws Exception {
-        LogoutRequest logoutRequest = new LogoutRequest();
-        logoutRequest.setUser(testUser);
 
-        doNothing().when(refreshService).revokeTokens(testUser);
-
-        mockMvc.perform(post("/auth/logout")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(logoutRequest)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Logout successful"));
-
-        verify(refreshService).revokeTokens(testUser);
-    }
-
-    @Test
-    void testRefreshTokenSuccess() throws Exception {
-        RefreshRequest refreshRequest = new RefreshRequest();
-        refreshRequest.setRefreshToken("valid-refresh-token");
-
-        when(refreshService.validate("valid-refresh-token")).thenReturn(Optional.of(testUser));
-        when(jwtUtil.generateAccessToken(testUser.getId())).thenReturn("new-access-token");
-
-        mockMvc.perform(post("/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(refreshRequest)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("new-access-token"));
-
-        verify(refreshService).validate("valid-refresh-token");
-        verify(jwtUtil).generateAccessToken(testUser.getId());
-    }
-
-    @Test
-    void testRefreshTokenInvalid() throws Exception {
-        RefreshRequest refreshRequest = new RefreshRequest();
-        refreshRequest.setRefreshToken("invalid-refresh-token");
-
-        when(refreshService.validate("invalid-refresh-token")).thenReturn(Optional.empty());
-
-        mockMvc.perform(post("/auth/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(refreshRequest)))
-                .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.token").value("Invalid refresh token"));
-
-        verify(refreshService).validate("invalid-refresh-token");
-        verify(jwtUtil, never()).generateAccessToken(any());
-    }
 
     // Unit tests for direct controller method calls
     @Test

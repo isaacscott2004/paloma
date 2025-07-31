@@ -1,6 +1,5 @@
 package com.paloma.paloma.javaServer.dataTransferObjects.requests;
 
-import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import lombok.AllArgsConstructor;
 import lombok.Data;

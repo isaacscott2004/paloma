@@ -1,8 +1,6 @@
 package com.paloma.paloma.javaServer.controllers;
 
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.LogoutRequest;
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.RefreshRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
@@ -10,9 +8,7 @@ import com.paloma.paloma.javaServer.entities.AuthCred;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
 import com.paloma.paloma.javaServer.repositories.AuthCredRepository;
-import com.paloma.paloma.javaServer.services.RefreshService;
 import com.paloma.paloma.javaServer.services.UserService;
-import com.paloma.paloma.javaServer.utilites.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -29,10 +25,8 @@ public class AuthController {
     private static final String INVALID_CREDENTIALS_MESSAGE = "Invalid credentials";
 
     private final UserService userService;
-    private final RefreshService refreshService;
     private final AuthCredRepository authCredRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtil jwtUtil;
 
 
     @PostMapping("/register")
@@ -68,35 +62,9 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/logout")
-    public ResponseEntity<?> logout(@RequestBody LogoutRequest request) {
-        refreshService.revokeTokens(request.getUser());
-        return ResponseEntity.ok("Logout successful");
-    }
-
-    @PostMapping("/refresh")
-    public ResponseEntity<JwtResponse> refresh(@RequestBody RefreshRequest request) {
-        String refreshToken = request.getRefreshToken();
-
-        try {
-            return refreshService.validate(refreshToken)
-                    .map(user -> {
-                        String newAccessToken = jwtUtil.generateAccessToken(user.getId());
-                        return ResponseEntity.ok(new JwtResponse(newAccessToken));
-                    })
-                    .orElse(ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                            .body(new JwtResponse("Invalid refresh token")));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(new JwtResponse("Invalid refresh token"));
-        }
-    }
-
-
-
-
-
-
 
 }
+
+
+
 

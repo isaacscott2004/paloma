@@ -37,7 +37,7 @@ public class UserService {
 
 
 
-public RegisterResponse register(RegisterRequest request) throws UserException {
+    public RegisterResponse register(RegisterRequest request) throws UserException {
     User user = new User();
     user.setUsername(request.getUsername());
     user.setEmail(request.getEmail());
@@ -53,7 +53,6 @@ public RegisterResponse register(RegisterRequest request) throws UserException {
     if (userRepository.existsByUsername(user.getUsername())){
         throw new UserException("There is already an account with the username: " + user.getUsername());
     }
-    user.setCreatedAt(java.time.LocalDateTime.now());
     try {
         userRepository.save(user);
     } catch (Exception e) {
@@ -73,10 +72,10 @@ public RegisterResponse register(RegisterRequest request) throws UserException {
     userRoleRepository.save(userRole);
 
     return new RegisterResponse(user);
-}
+    }
 
 
-public LoginResponse login(LoginRequest request) throws AuthenticationException {
+    public LoginResponse login(LoginRequest request) throws AuthenticationException {
     String emailOrUsernameOrPhone = request.getEmailOrUsername();
     User user = userRepository.findByEmailOrUsername(emailOrUsernameOrPhone, emailOrUsernameOrPhone).orElseThrow(() ->
             new AuthenticationException("Invalid credentials"));
@@ -93,8 +92,6 @@ public LoginResponse login(LoginRequest request) throws AuthenticationException 
     refreshAuth.setExpiryDate(java.time.LocalDateTime.now().plusDays(7));
     refreshAuthRepository.save(refreshAuth);
     return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), refreshToken);
-}
-
-
+    }
 
 }

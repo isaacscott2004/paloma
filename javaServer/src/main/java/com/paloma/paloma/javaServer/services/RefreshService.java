@@ -3,9 +3,9 @@ package com.paloma.paloma.javaServer.services;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.repositories.RefreshAuthRepository;
-import com.paloma.paloma.javaServer.repositories.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -16,6 +16,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 @Transactional
 public class RefreshService {
+
+    @Autowired
     private final RefreshAuthRepository refreshAuthRepository;
 
     public Optional<User> validate(String token) {
@@ -33,6 +35,11 @@ public class RefreshService {
                 LocalDateTime.now().plusDays(7) // adjust duration as needed
         );
         return refreshAuthRepository.save(refreshToken);
+    }
+
+    public void deleteByToken(String token) {
+        refreshAuthRepository.findByToken(token)
+                .ifPresent(refreshAuthRepository::delete);
     }
 
 
