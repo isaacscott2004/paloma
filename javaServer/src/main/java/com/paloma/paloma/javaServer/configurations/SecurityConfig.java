@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/**","/", "/index.html",
-                                "/static/**", "/index.css", "/index.js", "/auth/register").permitAll()
+                                "/static/**", "/index.css", "/index.js", "/auth/register", "/db").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
