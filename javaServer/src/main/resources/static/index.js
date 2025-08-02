@@ -138,9 +138,7 @@ function logout() {
   displayRequest('DELETE', '/insession/logout');
 }
 function refresh() {
-  displayRequest('POST', '/insession/refresh', {
-    refreshToken: localStorage.getItem('refreshToken') || 'refresh-token-here'
-  });
+  displayRequest('POST', '/insession/refresh');
 }
 
 // Role Management

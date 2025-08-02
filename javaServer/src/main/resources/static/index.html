@@ -152,16 +152,6 @@
         </td>
     </tr>
     <tr>
-        <td class="endpoint" onclick="clearAll()">
-            <div class="method">[DELETE]</div>
-            <div class="path">/db</div>
-        </td>
-        <td>
-            <span class="description">Clear ALL data from the database</span> No
-            authorization authToken is required.
-        </td>
-    </tr>
-    <tr>
         <td class="endpoint" onclick="makeTrustedContact()">
             <div class="method">[POST]</div>
             <div class="path">/api/roles/make-trusted-contact/{userId}</div>
@@ -205,6 +195,16 @@
         </td>
         <td>
             <span class="description">Remove role from user</span> Removes a specific role from a user. Cannot remove the last role.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="clearAll()">
+            <div class="method">[DELETE]</div>
+            <div class="path">/db</div>
+        </td>
+        <td>
+            <span class="description">Clear ALL data from the database</span> No
+            authorization authToken is required.
         </td>
     </tr>
 </table>
