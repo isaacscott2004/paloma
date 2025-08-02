@@ -20,11 +20,23 @@ public class RefreshService {
     @Autowired
     private final RefreshAuthRepository refreshAuthRepository;
 
+
     public Optional<User> validate(String token) {
         return refreshAuthRepository.findByToken(token)
-                .filter(rt -> rt.getExpiryDate().isAfter(LocalDateTime.now()))
-                .map(RefreshAuth::getUser);
+                .map(rt -> {
+                    if (rt.getExpiryDate().isBefore(LocalDateTime.now())) {
+                        refreshAuthRepository.delete(rt);  // Delete expired token
+                        return null;
+                    } else {
+                        return rt.getUser();
+                    }
+                });
     }
+
+    public Optional<RefreshAuth> findByUserID(UUID userID) {
+        return refreshAuthRepository.findByUserId(userID);
+    }
+
 
     public RefreshAuth createRefreshToken(User user) {
         String token = UUID.randomUUID().toString();
@@ -41,6 +53,8 @@ public class RefreshService {
         refreshAuthRepository.findByToken(token)
                 .ifPresent(refreshAuthRepository::delete);
     }
+
+
 
 
 
