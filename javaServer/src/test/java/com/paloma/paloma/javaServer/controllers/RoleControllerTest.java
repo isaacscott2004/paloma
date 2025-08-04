@@ -1,6 +1,7 @@
 package com.paloma.paloma.javaServer.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.AddRoleRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.UserRolesResponse;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
@@ -47,8 +49,17 @@ class RoleControllerTest {
 
     @BeforeEach
     void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(roleController).build();
-        objectMapper = new ObjectMapper();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        
+        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+        converter.setObjectMapper(objectMapper);
+        
+        mockMvc = MockMvcBuilders.standaloneSetup(roleController)
+                .setMessageConverters(converter)
+                .build();
+        
+        this.objectMapper = objectMapper;
         
         testUserId = UUID.randomUUID();
 

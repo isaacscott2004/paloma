@@ -124,21 +124,51 @@
     <tr>
         <td class="endpoint" onclick="addContact()">
             <div class="method">[POST]</div>
-            <div class="path">/loggedIn</div>
+            <div class="path">/insession/addContact</div>
         </td>
         <td>
             <span class="description">User adds a trusted contact to their profile</span>
-            An authToken is required
+            An authorization token is required. Requires email, phone, and optional messageOnNotify.
         </td>
     </tr>
     <tr>
-        <td class="endpoint" onclick="updateContact()">
+        <td class="endpoint" onclick="updateEmail()">
             <div class="method">[PUT]</div>
-            <div class="path">/loggedIn</div>
+            <div class="path">/insession/update/email</div>
         </td>
         <td>
-            <span class="description">Updates contact info</span>
-            An authToken is required
+            <span class="description">Updates user's email address</span>
+            An authorization token is required. Requires newEmail in request body.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="updatePassword()">
+            <div class="method">[PUT]</div>
+            <div class="path">/insession/update/password</div>
+        </td>
+        <td>
+            <span class="description">Updates user's password</span>
+            An authorization token is required. Requires oldPassword and newPassword in request body.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="updateUsername()">
+            <div class="method">[PUT]</div>
+            <div class="path">/insession/update/username</div>
+        </td>
+        <td>
+            <span class="description">Updates user's username</span>
+            An authorization token is required. Requires newUsername in request body.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="updatePhone()">
+            <div class="method">[PUT]</div>
+            <div class="path">/insession/update/phone</div>
+        </td>
+        <td>
+            <span class="description">Updates user's phone number</span>
+            An authorization token is required. Requires newPhone in request body.
         </td>
     </tr>
     <tr>
