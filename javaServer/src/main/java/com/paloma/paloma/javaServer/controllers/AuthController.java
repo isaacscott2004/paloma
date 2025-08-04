@@ -13,11 +13,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller for handling authentication-related operations.
+ * This controller provides endpoints for user registration and login.
+ */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -29,6 +30,12 @@ public class AuthController {
     private final PasswordEncoder passwordEncoder;
 
 
+    /**
+     * Registers a new user in the system.
+     * 
+     * @param request The registration request containing user details
+     * @return ResponseEntity with the registered user information or error message
+     */
     @PostMapping("/register")
     public ResponseEntity<RegisterResponse> register(@RequestBody RegisterRequest request) {
         try {
@@ -50,6 +57,12 @@ public class AuthController {
         }
     }
 
+    /**
+     * Authenticates a user and returns a JWT token.
+     * 
+     * @param request The login request containing user credentials
+     * @return ResponseEntity with the JWT token or error message
+     */
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
         try {
@@ -61,6 +74,7 @@ public class AuthController {
                     .body(new JwtResponse(INVALID_CREDENTIALS_MESSAGE));
         }
     }
+
 
 
 }

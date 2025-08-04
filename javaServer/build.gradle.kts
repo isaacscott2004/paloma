@@ -35,6 +35,10 @@ dependencies {
 	testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
+	
+	// Email and SMS dependencies
+	implementation("org.springframework.boot:spring-boot-starter-mail")
+	implementation("com.twilio.sdk:twilio:9.14.0")
 }
 tasks.test {
 	useJUnitPlatform()

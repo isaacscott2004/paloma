@@ -131,10 +131,6 @@ function login() {
   });
 }
 function logout() {
-  // Option 1: Send the refresh token in the request body (original behavior)
-  // displayRequest('DELETE', '/insession/logout', { refreshToken: localStorage.getItem('refreshToken') || 'refresh-token-here' });
-  
-  // Option 2: Send an empty request body, relying on the access token in the Authorization header
   displayRequest('DELETE', '/insession/logout');
 }
 function refresh() {
@@ -192,10 +188,26 @@ function getMedications() {
   displayRequest('GET', '/loggedIn');
 }
 function addContact() {
-  displayRequest('POST', '/loggedIn', { name: 'name', phone: 'phone', email: 'email' });
+  displayRequest('POST', '/insession/addContact', { 
+    email: 'contact@example.com', 
+    phone: '+1234567890', 
+    messageOnNotify: 'Please help me if I need support' 
+  });
 }
-function updateContact() {
-  displayRequest('PUT', '/loggedIn', { name: 'name', phone: 'phone', email: 'email' });
+function updateEmail() {
+  displayRequest('PUT', '/insession/update/email', { newEmail: 'newemail@example.com' });
+}
+function updatePassword() {
+  displayRequest('PUT', '/insession/update/password', { 
+    oldPassword: 'currentPassword', 
+    newPassword: 'newPassword' 
+  });
+}
+function updateUsername() {
+  displayRequest('PUT', '/insession/update/username', { newUsername: 'newUsername' });
+}
+function updatePhone() {
+  displayRequest('PUT', '/insession/update/phone', { newPhone: '+9876543210' });
 }
 function getContacts() {
   displayRequest('GET', '/loggedIn');

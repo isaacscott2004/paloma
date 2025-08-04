@@ -24,6 +24,9 @@ Optional<User> findByPhone(String phone);
 
 Optional<User> findByEmailOrUsername(String email, String username);
 
+Optional<User> findByEmailOrPhone(String email, String phone);
+
+
 
 
 boolean existsByEmail(String email);
