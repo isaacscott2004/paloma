@@ -189,8 +189,8 @@ function getMedications() {
 }
 function addContact() {
   displayRequest('POST', '/insession/addContact', { 
-    email: 'contact@example.com', 
-    phone: '+1234567890', 
+    email: 'isaacscottirwin@gmail.com',
+    phone: '+18777804236',
     messageOnNotify: 'Please help me if I need support' 
   });
 }

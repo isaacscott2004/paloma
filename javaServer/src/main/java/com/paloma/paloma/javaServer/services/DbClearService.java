@@ -35,25 +35,29 @@ public class DbClearService {
         // Clear data in a specific order to avoid foreign key constraint violations
         
         // First, clear entities that depend on other entities (child tables)
-        // These repositories extend JpaRepository and have deleteAll() method
+        // Delete alerts before trusted contacts since alerts reference trusted contacts
+        alertRepository.deleteAll();
+        
+        // Delete other child entities
         refreshAuthRepository.deleteAll();
         authCredRepository.deleteAll();
         userRoleRepository.deleteAll();
+        
+        // Delete trusted contacts before users since trusted contacts reference users
+        trustedContactRepository.deleteAll();
         
         // Then clear parent entities
         userRepository.deleteAll();
         roleRepository.deleteAll();
         
-        // The following repositories are empty interfaces that don't extend JpaRepository
-        // and don't have deleteAll() methods. They appear to be placeholders for future implementation.
-        // If they are implemented in the future, this method should be updated to include them.
+        // The following repositories may not have been fully implemented yet
+        // If they are implemented in the future, this method should be updated to include them
+        // in the appropriate order based on their dependencies.
         //
-        // alertRepository - empty interface
-        // dailyCheckinRepository - empty interface
-        // medLogRepository - empty interface
-        // medicationRepository - empty interface
-        // scoreHistoryRepository - empty interface
-        // trustedContactRepository - empty interface
+        // dailyCheckinRepository
+        // medLogRepository
+        // medicationRepository
+        // scoreHistoryRepository
         
         // Log a message indicating that the database has been cleared
         System.out.println("Database cleared successfully at " + java.time.LocalDateTime.now());

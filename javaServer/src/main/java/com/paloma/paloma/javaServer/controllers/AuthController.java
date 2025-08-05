@@ -3,6 +3,7 @@ package com.paloma.paloma.javaServer.controllers;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
 import com.paloma.paloma.javaServer.entities.AuthCred;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
@@ -52,7 +53,7 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (UserException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(
-                    new RegisterResponse(e.getMessage())
+                    new RegisterResponse(null, e.getMessage())
             );
         }
     }
@@ -66,8 +67,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(@RequestBody LoginRequest request) {
         try {
-            String token = userService.login(request).getAccessAuthToken();
-            return ResponseEntity.ok(new JwtResponse(token));
+            LoginResponse loginResponse = userService.login(request);
+            return ResponseEntity.ok(new JwtResponse(loginResponse.getAccessToken(), loginResponse.getMessage()));
         } catch (AuthenticationException e) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
