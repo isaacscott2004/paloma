@@ -82,7 +82,6 @@ public class UserService {
         try {
             userRepository.save(user);
         } catch (Exception e) {
-            e.printStackTrace(); // Important
             throw new RuntimeException("User save failed: " + e.getMessage());
         }
 
@@ -97,7 +96,8 @@ public class UserService {
         userRole.setPrimary(primary);
         userRoleRepository.save(userRole);
 
-        return new RegisterResponse(user);
+        return new RegisterResponse(user,
+                "Successfully registered user with role: " + request.getRoleType().name());
     }
 
     /**
@@ -124,7 +124,7 @@ public class UserService {
         refreshAuth.setToken(refreshToken);
         refreshAuth.setExpiryDate(LocalDateTime.now().plusDays(7));
         refreshAuthRepository.save(refreshAuth);
-        return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), refreshToken);
+        return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), "Successfully logged in");
     }
 
     /**
@@ -222,30 +222,12 @@ public class UserService {
                 return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), true);
             }
         } else {
-            // Case 2: Contact doesn't exist in the system
-            // Create a temporary user for the contact
-            User newContactUser = new User();
-            newContactUser.setEmail(contactEmail);
-            newContactUser.setPhone(contactPhone);
-            newContactUser.setUsername(contactEmail); // Use email as temporary username
-            newContactUser.setFullName("Invited Contact"); // Set a default name for the contact
-            
             try {
-                // Save the new user
-                userRepository.save(newContactUser);
-                
-                // Create a trusted contact relationship
-                TrustedContact trustedContact = new TrustedContact();
-                trustedContact.setUser(user);
-                trustedContact.setContactUser(newContactUser);
-                trustedContact.setMessageOnNotify(messageOnNotify);
-                trustedContactRepository.save(trustedContact);
-                
-                // Send invitation email and SMS
                 boolean emailSent = emailService.sendInvitationEmail(contactEmail, user.getFullName(), messageOnNotify);
                 boolean smsSent = smsService.sendInvitationSMS(contactPhone, user.getFullName(), messageOnNotify);
                 
-                return new AddContactResponse(true, "Contact added and invitations sent", false, emailSent, smsSent);
+                return new AddContactResponse(true, "Contact added and invitations sent. Please " +
+                        "re-add Contact when they have created an account", false, emailSent, smsSent);
             } catch (Exception e) {
                 return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), false);
             }

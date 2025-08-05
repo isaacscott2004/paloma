@@ -131,7 +131,7 @@ public class AuthControllerTest {
 
     @Test
     void testLoginSuccess() throws Exception {
-        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token");
+        LoginResponse expectedResponse = new LoginResponse("access-token", "Successfully logged in");
         when(userService.login(any(LoginRequest.class))).thenReturn(expectedResponse);
 
         mockMvc.perform(post("/auth/login")
@@ -177,7 +177,7 @@ public class AuthControllerTest {
 
     @Test
     void testLoginDirectCall() {
-        LoginResponse expectedResponse = new LoginResponse("access-token", "refresh-token");
+        LoginResponse expectedResponse = new LoginResponse("access-token", "Successfully logged in");
         when(userService.login(any(LoginRequest.class))).thenReturn(expectedResponse);
 
         ResponseEntity<JwtResponse> response = authController.login(loginRequest);

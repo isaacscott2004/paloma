@@ -12,13 +12,6 @@ public class RegisterResponse {
     private User user;
     private String message;
 
-    public RegisterResponse(User user) {
-        this.user = user;
-        this.message = null;
-    }
-    public RegisterResponse(String message) {
-        this.user = null;
-        this.message = message;
-    }
+
 
 }
