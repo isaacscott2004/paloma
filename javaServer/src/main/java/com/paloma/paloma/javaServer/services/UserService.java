@@ -1,11 +1,12 @@
 package com.paloma.paloma.javaServer.services;
 
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
+import com.paloma.paloma.javaServer.dataTransferObjects.requests.AddRoleRequest;
+import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
+import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.UserRolesResponse;
 import com.paloma.paloma.javaServer.entities.*;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
@@ -284,67 +285,8 @@ public class UserService {
         }
     }
 
-    /**
-     * Adds a role to a user.
-     * 
-     * @param request The request containing the user ID, role type, and whether it should be primary
-     * @return UserRolesResponse with the user's updated roles
-     * @throws UserException If the user is not found or already has the role
-     */
-    public UserRolesResponse addRoleToUser(AddRoleRequest request) throws UserException {
-        return roleManagementService.addRoleToUser(request);
-    }
 
-    /**
-     * Removes a role from a user.
-     * 
-     * @param request The request containing the user ID and role type to remove
-     * @return UserRolesResponse with the user's updated roles
-     * @throws UserException If the user is not found, doesn't have the role, or it's their only role
-     */
-    public UserRolesResponse removeRoleFromUser(RemoveRoleRequest request) throws UserException {
-        return roleManagementService.removeRoleFromUser(request.getUserId(), request.getRoleType());
-    }
 
-    /**
-     * Gets a user's roles.
-     * 
-     * @param request The request containing the user ID
-     * @return UserRolesResponse with the user's roles
-     * @throws UserException If the user is not found
-     */
-    public UserRolesResponse getUserRoles(GetUserRolesRequest request) throws UserException {
-        return roleManagementService.getUserRoles(request.getUserId());
-    }
 
-    /**
-     * Checks if a user has a specific role.
-     * 
-     * @param request The request containing the user ID and role type to check
-     * @return true if the user has the role, false otherwise
-     */
-    public boolean userHasRole(CheckUserRolesRequest request) {
-        return roleManagementService.userHasRole(request.getUserId(), request.getRoleType());
-    }
 
-    /**
-     * Checks if a user has both USER and TRUSTED_CONTACT roles.
-     * 
-     * @param request The request containing the user ID
-     * @return true if the user has both roles, false otherwise
-     */
-    public boolean userHasBothRoles(CheckUserRolesRequest request) {
-        return roleManagementService.userHasBothRoles(request.getUserId());
-    }
-
-    /**
-     * Makes a user a trusted contact by adding the TRUSTED_CONTACT role.
-     * 
-     * @param request The request containing the user ID
-     * @return UserRolesResponse with the user's updated roles
-     * @throws UserException If the user is not found or already has the role
-     */
-    public UserRolesResponse makeTrustedContact(MakeTrustedContactRequest request) throws UserException {
-        return roleManagementService.makeTrustedContact(request.getUserId());
-    }
 }
