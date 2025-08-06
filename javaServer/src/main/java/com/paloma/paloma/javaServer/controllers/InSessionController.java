@@ -4,7 +4,6 @@ import com.paloma.paloma.javaServer.controllers.accessToken.GetAccessToken;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.UserRolesResponse;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.exceptions.UnauthorizedException;
@@ -175,115 +174,6 @@ public class InSessionController {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
         });
-    }
-
-    /**
-     * Adds a role to a user.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param request The request containing the user ID, role type, and whether it should be primary
-     * @return ResponseEntity with the user's updated roles or error message
-     */
-    @PostMapping("/roles/add")
-    public ResponseEntity<UserRolesResponse> addRole(@RequestHeader("Authorization") String authHeader,
-                                                    @RequestBody AddRoleRequest request) {
-        try {
-            UserRolesResponse response = userService.addRoleToUser(request);
-            return ResponseEntity.ok(response);
-        } catch (UserException e) {
-            UserRolesResponse errorResponse = new UserRolesResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
-
-    /**
-     * Removes a role from a user.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param request The request containing the user ID and role type to remove
-     * @return ResponseEntity with the user's updated roles or error message
-     */
-    @DeleteMapping("/roles/remove")
-    public ResponseEntity<UserRolesResponse> removeRole(@RequestHeader("Authorization") String authHeader,
-                                                       @RequestBody RemoveRoleRequest request) {
-        try {
-            UserRolesResponse response = userService.removeRoleFromUser(request);
-            return ResponseEntity.ok(response);
-        } catch (UserException e) {
-            UserRolesResponse errorResponse = new UserRolesResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
-
-    /**
-     * Gets a user's roles.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param request The request containing the user ID
-     * @return ResponseEntity with the user's roles or error message
-     */
-    @PostMapping("/roles/get")
-    public ResponseEntity<UserRolesResponse> getUserRoles(@RequestHeader("Authorization") String authHeader,
-                                                         @RequestBody GetUserRolesRequest request) {
-        try {
-            UserRolesResponse response = userService.getUserRoles(request);
-            return ResponseEntity.ok(response);
-        } catch (UserException e) {
-            UserRolesResponse errorResponse = new UserRolesResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
-
-    /**
-     * Makes a user a trusted contact by adding the TRUSTED_CONTACT role.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param request The request containing the user ID
-     * @return ResponseEntity with the user's updated roles or error message
-     */
-    @PostMapping("/roles/make-trusted-contact")
-    public ResponseEntity<UserRolesResponse> makeTrustedContact(@RequestHeader("Authorization") String authHeader,
-                                                               @RequestBody MakeTrustedContactRequest request) {
-        try {
-            UserRolesResponse response = userService.makeTrustedContact(request);
-            response.setMessage("Successfully added TRUSTED_CONTACT role to user");
-            return ResponseEntity.ok(response);
-        } catch (UserException e) {
-            UserRolesResponse errorResponse = new UserRolesResponse();
-            errorResponse.setMessage(e.getMessage());
-            return ResponseEntity.badRequest().body(errorResponse);
-        }
-    }
-
-    /**
-     * Checks if a user has a specific role.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param request The request containing the user ID and role type to check
-     * @return ResponseEntity with true if the user has the role, false otherwise
-     */
-    @PostMapping("/roles/check")
-    public ResponseEntity<Boolean> checkUserHasRole(@RequestHeader("Authorization") String authHeader,
-                                                  @RequestBody CheckUserRolesRequest request) {
-        boolean hasRole = userService.userHasRole(request);
-        return ResponseEntity.ok(hasRole);
-    }
-
-    /**
-     * Checks if a user has both USER and TRUSTED_CONTACT roles.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param request The request containing the user ID
-     * @return ResponseEntity with true if the user has both roles, false otherwise
-     */
-    @PostMapping("/roles/check-both")
-    public ResponseEntity<Boolean> checkUserHasBothRoles(@RequestHeader("Authorization") String authHeader,
-                                                       @RequestBody CheckUserRolesRequest request) {
-        boolean hasBothRoles = userService.userHasBothRoles(request);
-        return ResponseEntity.ok(hasBothRoles);
     }
 
     /**
