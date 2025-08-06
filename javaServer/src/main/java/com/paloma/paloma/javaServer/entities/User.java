@@ -52,15 +52,6 @@ public class User {
     private String email;
 
     /**
-     * The user's phone number, used for SMS notifications.
-     * Must be unique across all users.
-     */
-    @NotBlank(message = "Phone number is required")
-    @Size(max = 20, message = "Phone number must be less than 20 digits")
-    @Column(unique = true, nullable = false)
-    private String phone;
-
-    /**
      * The user's full name.
      */
     @Size(max = 100, message = "Full name must be less than 100 characters")

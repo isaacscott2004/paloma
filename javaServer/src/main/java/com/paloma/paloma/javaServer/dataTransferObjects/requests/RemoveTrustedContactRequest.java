@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-public class UpdatePhoneRequest {
-    private String newPhone;
+public class RemoveTrustedContactRequest {
+    private String email;
 }

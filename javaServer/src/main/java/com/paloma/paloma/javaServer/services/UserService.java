@@ -53,8 +53,6 @@ public class UserService {
 
     private final EmailService emailService;
 
-    private final SMSService smsService;
-
     private final RoleManagementService roleManagementService;
 
     private final JwtUtil jwtUtil;
@@ -70,18 +68,15 @@ public class UserService {
      * @return RegisterResponse with the registered user information
      * @throws UserException If the email, phone, or username is already in use
      */
+    @Transactional
     public RegisterResponse register(RegisterRequest request) throws UserException {
         User user = new User();
         user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
-        user.setPhone(request.getPhone());
         user.setFullName(request.getFullName());
 
         if (userRepository.existsByEmail(user.getEmail())){
             throw new UserException("There is already an account with the email address: " + user.getEmail());
-        }
-        if (userRepository.existsByPhone(user.getPhone())){
-            throw new UserException("There is already an account with the phone number: " + user.getPhone());
         }
         if (userRepository.existsByUsername(user.getUsername())){
             throw new UserException("There is already an account with the username: " + user.getUsername());
@@ -123,23 +118,25 @@ public class UserService {
      * @return LoginResponse with access and refresh tokens
      * @throws AuthenticationException If the credentials are invalid
      */
+    @Transactional
     public LoginResponse login(LoginRequest request) throws AuthenticationException {
-        String emailOrUsername = request.getEmailOrUsername();
-        User user = userRepository.findByEmailOrUsername(emailOrUsername, emailOrUsername).orElseThrow(() ->
-                new AuthenticationException("Invalid credentials"));
+        String identifier = request.getEmailOrUsername();
+
+        User user = userRepository.findByEmailOrUsername(identifier, identifier)
+                .orElseThrow(() -> new AuthenticationException("Invalid credentials"));
+
         AuthCred auth = authCredentialsRepository.findByUserId(user.getId());
-        if (!passwordEncoder.matches(request.getPassword(), auth.getPasswordHash())) {
+        if (auth == null || !passwordEncoder.matches(request.getPassword(), auth.getPasswordHash())) {
             throw new AuthenticationException("Invalid password");
         }
+
         user.setLastLogin(LocalDateTime.now());
-        userRepository.save(user);
-        String refreshToken = jwtUtil.generateRefreshToken(user.getId());
-        RefreshAuth refreshAuth = new RefreshAuth();
-        refreshAuth.setUser(user);
-        refreshAuth.setToken(refreshToken);
-        refreshAuth.setExpiryDate(LocalDateTime.now().plusDays(7));
-        refreshAuthRepository.save(refreshAuth);
-        return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), "Welcome " + user.getFullName() + "!");
+        userRepository.save(user); 
+
+        handleRefreshToken(user);
+
+        String accessToken = jwtUtil.generateAccessToken(user.getId());
+        return new LoginResponse(accessToken, "Welcome " + user.getFullName() + "!");
     }
 
     /**
@@ -161,6 +158,7 @@ public class UserService {
      * @param newPassword The new password
      * @throws AuthenticationException If the old password is incorrect
      */
+    @Transactional
     public void updatePassword(User user, String oldPassword, String newPassword) throws AuthenticationException {
         AuthCred auth = authCredentialsRepository.findByUserId(user.getId());
         if (!passwordEncoder.matches(oldPassword, auth.getPasswordHash())) {
@@ -176,6 +174,7 @@ public class UserService {
      * @param user The user whose email is being updated
      * @param newEmail The new email address
      */
+    @Transactional
     public void updateEmail(User user, String newEmail) {
         user.setEmail(newEmail);
         userRepository.save(user);
@@ -187,35 +186,25 @@ public class UserService {
      * @param user The user whose username is being updated
      * @param newUsername The new username
      */
+    @Transactional
     public void updateUsername(User user, String newUsername)  {
         user.setUsername(newUsername);
         userRepository.save(user);
     }
 
     /**
-     * Updates a user's phone number.
-     * 
-     * @param user The user whose phone number is being updated
-     * @param newPhone The new phone number
-     */
-    public void updatePhone(User user, String newPhone)  {
-        user.setPhone(newPhone);
-        userRepository.save(user);
-    }
-
-    /**
      * Adds a trusted contact for a user.
      * If the contact already exists in the system, a relationship is created.
-     * If the contact doesn't exist, a new user is created and invitations are sent via email and SMS.
+     * If the contact doesn't exist, a new user is created and an invitation is sent via email.
      *
      * @param user The user adding the contact
      * @param contactEmail The email address of the contact
-     * @param contactPhone The phone number of the contact
      * @param messageOnNotify The message to send to the contact when an alert is triggered
      * @return AddContactResponse with the result of the operation
      */
-    public AddContactResponse addContact(User user, String contactEmail, String contactPhone, String messageOnNotify) {
-        Optional<User> contactUserOptional = userRepository.findByEmailOrUsername(contactEmail, contactEmail);
+    @Transactional
+    public AddContactResponse addContact(User user, String contactEmail, String messageOnNotify) {
+        Optional<User> contactUserOptional = userRepository.findByEmail(contactEmail);
 
         if (contactUserOptional.isPresent()) {
             User contactUser = contactUserOptional.get();
@@ -236,20 +225,35 @@ public class UserService {
 
         } else {
             // Contact not found — invite them and tell the user to re-add later
-            return inviteNewContact(contactEmail, contactPhone, user.getFullName(), messageOnNotify);
+            return inviteNewContact(contactEmail, user.getFullName(), messageOnNotify);
         }
     }
-
-    public RemoveContactResponse removeContact(User user, User contactUser) {
-
-                Optional<TrustedContact> optionalTrustedContact =
-                        trustedContactRepository.findByUserIdAndContactUserId(user.getId(), contactUser.getId());
-                optionalTrustedContact.ifPresent(trustedContactRepository::delete);
-                if(optionalTrustedContact.isEmpty()){
-                    return new RemoveContactResponse("Contact not found");
+    @Transactional
+    public RemoveContactResponse removeContact(User user, String contactEmail) {
+        Optional<User> optionalContactUser = userRepository.findByEmail(contactEmail);
+        User contactUser;
+        if (optionalContactUser.isPresent()) {
+            contactUser = optionalContactUser.get();
+        } else{
+            return new RemoveContactResponse(false,"Contact not found");
+        }
+        Optional<TrustedContact> optionalTrustedContact =
+                trustedContactRepository.findByUserIdAndContactUserId(user.getId(), contactUser.getId());
+        if (optionalTrustedContact.isPresent()) {
+            trustedContactRepository.delete(optionalTrustedContact.get());
+            if (trustedContactRepository.findAllByContactUserId(contactUser.getId()).isEmpty()
+                    && roleManagementService.userHasBothRoles(contactUser.getId())) {
+                try {
+                    roleManagementService.removeRoleFromUser(contactUser.getId(), TRUSTED_CONTACT);
+                    
+                } catch (UserException e) {
+                    return new RemoveContactResponse(false,"Contact not found");
                 }
-                return new RemoveContactResponse("Contact removed successfully");
-
+            }
+        } else {
+            return new RemoveContactResponse(false,"Contact not found");
+        }
+        return new RemoveContactResponse(true, "Contact removed successfully");
 
 
     }
@@ -268,20 +272,33 @@ public class UserService {
         }
     }
 
-    private AddContactResponse inviteNewContact(String email, String phone, String senderName, String messageOnNotify) {
+    private AddContactResponse inviteNewContact(String email, String senderName, String messageOnNotify) {
         try {
             boolean emailSent = emailService.sendInvitationEmail(email, senderName, messageOnNotify);
-            boolean smsSent = smsService.sendInvitationSMS(phone, senderName, messageOnNotify);
 
             return new AddContactResponse(
                     true,
-                    "Contact added and invitations sent. Please re-add contact when they have created an account",
+                    "Contact added and invitation email sent. Please re-add contact when they have created an account",
                     false,
-                    emailSent,
-                    smsSent
+                    emailSent
             );
         } catch (Exception e) {
             return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), false);
+        }
+    }
+
+    private void handleRefreshToken(User user) {
+        Optional<RefreshAuth> existing = refreshAuthRepository.findByUserId(user.getId());
+
+        if (existing.isEmpty() || existing.get().getExpiryDate().isBefore(LocalDateTime.now())) {
+            existing.ifPresent(refreshAuthRepository::delete);
+
+            RefreshAuth newToken = new RefreshAuth();
+            newToken.setUser(user);
+            newToken.setToken(jwtUtil.generateRefreshToken(user.getId()));
+            newToken.setExpiryDate(LocalDateTime.now().plusDays(7));
+
+            refreshAuthRepository.save(newToken);
         }
     }
 

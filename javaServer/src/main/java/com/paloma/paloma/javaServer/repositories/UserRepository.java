@@ -20,20 +20,13 @@ Optional<User> findByEmail(String email);
 
 Optional<User> findByUsername(String username);
 
-Optional<User> findByPhone(String phone);
-
 Optional<User> findByEmailOrUsername(String email, String username);
-
-Optional<User> findByEmailOrPhone(String email, String phone);
-
-
-
 
 boolean existsByEmail(String email);
 
 boolean existsByUsername(String username);
 
-boolean existsByPhone(String phone);
+
 @Query("SELECT u FROM User u WHERE u.lastLogin < :cutoffDate")
 List<User> findInactiveUsers(@Param("cutoffDate") LocalDateTime cutoffDate);
 

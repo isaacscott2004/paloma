@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
@@ -72,7 +73,6 @@ public class InSessionControllerTest {
         testUser.setId(testUserId);
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
-        testUser.setPhone("+1234567890");
         testUser.setFullName("Test User");
         testUser.setCreatedAt(LocalDateTime.now());
     }
@@ -117,7 +117,7 @@ public class InSessionControllerTest {
         when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
         doNothing().when(refreshService).revokeTokens(testUser);
 
-        mockMvc.perform(delete("/insession/logout")
+        mockMvc.perform(post("/insession/logout")
                         .header("Authorization", authHeader))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Successfully logged out and revoked all refresh tokens"));
@@ -187,30 +187,11 @@ public class InSessionControllerTest {
         verify(userService).updateUsername(testUser, "newusername");
     }
 
-    @Test
-    void testUpdatePhone() throws Exception {
-        UpdatePhoneRequest updatePhoneRequest = new UpdatePhoneRequest("+19876543210");
-
-        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
-        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
-        doNothing().when(userService).updatePhone(testUser, "+19876543210");
-
-        mockMvc.perform(put("/insession/update/phone")
-                        .header("Authorization", authHeader)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatePhoneRequest)))
-                .andExpect(status().isOk())
-                .andExpect(content().string("Successfully updated phone"));
-
-        verify(jwtUtil).validateTokenAndGetUserId(validToken);
-        verify(userService).getUserById(testUserId);
-        verify(userService).updatePhone(testUser, "+19876543210");
-    }
 
     @Test
     void testAddContactSuccess() throws Exception {
         AddTrustedContactRequest addTrustedContactRequest = new AddTrustedContactRequest(
-                "contact@example.com", "+19876543210", "Please help me if I need support");
+                "contact@example.com", "Please help me if I need support");
         
         AddContactResponse successResponse = new AddContactResponse(
                 true, "Contact added successfully", true);
@@ -218,7 +199,7 @@ public class InSessionControllerTest {
         when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
         when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
         when(userService.addContact(eq(testUser), eq("contact@example.com"), 
-                eq("+19876543210"), eq("Please help me if I need support")))
+                eq("Please help me if I need support")))
                 .thenReturn(successResponse);
 
         mockMvc.perform(post("/insession/addContact")
@@ -232,21 +213,21 @@ public class InSessionControllerTest {
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).addContact(eq(testUser), eq("contact@example.com"), 
-                eq("+19876543210"), eq("Please help me if I need support"));
+                eq("Please help me if I need support"));
     }
 
     @Test
     void testAddContactNewUser() throws Exception {
         AddTrustedContactRequest addTrustedContactRequest = new AddTrustedContactRequest(
-                "newcontact@example.com", "+19876543210", "Please help me if I need support");
+                "newcontact@example.com", "Please help me if I need support");
         
         AddContactResponse successResponse = new AddContactResponse(
-                true, "Contact added and invitations sent", false, true, true);
+                true, "Contact added and invitation email sent", false, true);
 
         when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
         when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
         when(userService.addContact(eq(testUser), eq("newcontact@example.com"), 
-                eq("+19876543210"), eq("Please help me if I need support")))
+                eq("Please help me if I need support")))
                 .thenReturn(successResponse);
 
         mockMvc.perform(post("/insession/addContact")
@@ -254,19 +235,19 @@ public class InSessionControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addTrustedContactRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().string(containsString("Contact added and invitations sent")))
+                .andExpect(content().string(containsString("Contact added and invitation email sent")))
                 .andExpect(content().string(containsString("true")));
 
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).addContact(eq(testUser), eq("newcontact@example.com"), 
-                eq("+19876543210"), eq("Please help me if I need support"));
+                eq("Please help me if I need support"));
     }
 
     @Test
     void testAddContactFailure() throws Exception {
         AddTrustedContactRequest addTrustedContactRequest = new AddTrustedContactRequest(
-                "contact@example.com", "+19876543210", "Please help me if I need support");
+                "contact@example.com", "Please help me if I need support");
         
         AddContactResponse failureResponse = new AddContactResponse(
                 false, "Failed to add contact: Database error", false);
@@ -274,7 +255,7 @@ public class InSessionControllerTest {
         when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
         when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
         when(userService.addContact(eq(testUser), eq("contact@example.com"), 
-                eq("+19876543210"), eq("Please help me if I need support")))
+                eq("Please help me if I need support")))
                 .thenReturn(failureResponse);
 
         mockMvc.perform(post("/insession/addContact")
@@ -288,7 +269,59 @@ public class InSessionControllerTest {
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).addContact(eq(testUser), eq("contact@example.com"), 
-                eq("+19876543210"), eq("Please help me if I need support"));
+                eq("Please help me if I need support"));
+    }
+    
+    @Test
+    void testRemoveContactSuccess() throws Exception {
+        RemoveTrustedContactRequest removeTrustedContactRequest = new RemoveTrustedContactRequest(
+                "contact@example.com");
+        
+        RemoveContactResponse successResponse = new RemoveContactResponse(
+                true, "Contact removed successfully");
+
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.removeContact(eq(testUser), eq("contact@example.com")))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(delete("/insession/removeContact")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(removeTrustedContactRequest)))
+                .andExpect(status().isOk())
+                .andExpect(content().string(containsString("Contact removed successfully")))
+                .andExpect(content().string(containsString("true")));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).removeContact(eq(testUser), eq("contact@example.com"));
+    }
+    
+    @Test
+    void testRemoveContactFailure() throws Exception {
+        RemoveTrustedContactRequest removeTrustedContactRequest = new RemoveTrustedContactRequest(
+                "nonexistent@example.com");
+        
+        RemoveContactResponse failureResponse = new RemoveContactResponse(
+                false, "Contact not found");
+
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.removeContact(eq(testUser), eq("nonexistent@example.com")))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(delete("/insession/removeContact")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(removeTrustedContactRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(content().string(containsString("Contact not found")))
+                .andExpect(content().string(containsString("false")));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).removeContact(eq(testUser), eq("nonexistent@example.com"));
     }
 
     @Test
