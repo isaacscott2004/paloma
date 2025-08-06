@@ -1,11 +1,13 @@
 package com.paloma.paloma.javaServer.services;
 
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
-import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
+import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.UserRolesResponse;
 import com.paloma.paloma.javaServer.entities.*;
+import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
 import com.paloma.paloma.javaServer.repositories.*;
@@ -16,9 +18,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.paloma.paloma.javaServer.entities.enums.RoleType.TRUSTED_CONTACT;
 import static com.paloma.paloma.javaServer.entities.enums.RoleType.USER;
 
 /**
@@ -50,6 +54,8 @@ public class UserService {
 
     private final SMSService smsService;
 
+    private final RoleManagementService roleManagementService;
+
     private final JwtUtil jwtUtil;
 
 
@@ -79,12 +85,19 @@ public class UserService {
         if (userRepository.existsByUsername(user.getUsername())){
             throw new UserException("There is already an account with the username: " + user.getUsername());
         }
-        try {
-            userRepository.save(user);
-        } catch (Exception e) {
-            throw new RuntimeException("User save failed: " + e.getMessage());
-        }
+        // add user to db
+        userRepository.save(user);
 
+        String hashedPassword = passwordEncoder.encode(request.getPassword());
+        AuthCred authCred = new AuthCred();
+
+        // add credentials to db
+        authCred.setUser(user);
+        authCred.setPasswordHash(hashedPassword);
+        authCred.setCreatedAt(user.getCreatedAt());
+        authCredentialsRepository.save(authCred);
+
+        // add role infromation to db
         Role role = new Role();
         role.setRoleType(request.getRoleType());
         roleRepository.save(role);
@@ -96,8 +109,9 @@ public class UserService {
         userRole.setPrimary(primary);
         userRoleRepository.save(userRole);
 
-        return new RegisterResponse(user,
-                "Successfully registered user with role: " + request.getRoleType().name());
+
+        return new RegisterResponse(
+                "Successfully registered " + request.getFullName() + " with role: " + request.getRoleType().name());
     }
 
     /**
@@ -124,7 +138,7 @@ public class UserService {
         refreshAuth.setToken(refreshToken);
         refreshAuth.setExpiryDate(LocalDateTime.now().plusDays(7));
         refreshAuthRepository.save(refreshAuth);
-        return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), "Successfully logged in");
+        return new LoginResponse(jwtUtil.generateAccessToken(user.getId()), "Welcome " + user.getFullName() + "!");
     }
 
     /**
@@ -192,49 +206,145 @@ public class UserService {
      * Adds a trusted contact for a user.
      * If the contact already exists in the system, a relationship is created.
      * If the contact doesn't exist, a new user is created and invitations are sent via email and SMS.
-     * 
+     *
      * @param user The user adding the contact
      * @param contactEmail The email address of the contact
      * @param contactPhone The phone number of the contact
      * @param messageOnNotify The message to send to the contact when an alert is triggered
      * @return AddContactResponse with the result of the operation
      */
-    public AddContactResponse addContact(User user, String contactEmail, String contactPhone,
-                                         String messageOnNotify){
-        // Check if the contact already exists in the system
+    public AddContactResponse addContact(User user, String contactEmail, String contactPhone, String messageOnNotify) {
         Optional<User> contactUserOptional = userRepository.findByEmailOrUsername(contactEmail, contactEmail);
 
-        
-        if(contactUserOptional.isPresent()){
-            // Case 1: Contact exists in the system
+        if (contactUserOptional.isPresent()) {
             User contactUser = contactUserOptional.get();
-            
-            // Create a trusted contact relationship
+            List<RoleType> roles = userRoleRepository.findRoleTypesByUser(contactUser);
+
+            // If the contact does not have TRUSTED_CONTACT role, add it
+            if (!roles.contains(RoleType.TRUSTED_CONTACT)) {
+                AddRoleRequest addRoleRequest = new AddRoleRequest(user.getId(), RoleType.TRUSTED_CONTACT, false);
+                try {
+                    roleManagementService.addRoleToUser(addRoleRequest);
+                } catch (UserException e) {
+                    return new AddContactResponse(false, "Failed to add role: " + e.getMessage(), true);
+                }
+            }
+
+            // Now create the trusted contact relationship
+            return saveTrustedContact(user, contactUser, messageOnNotify);
+
+        } else {
+            // Contact not found — invite them and tell the user to re-add later
+            return inviteNewContact(contactEmail, contactPhone, user.getFullName(), messageOnNotify);
+        }
+    }
+
+    public RemoveContactResponse removeContact(User user, User contactUser) {
+
+                Optional<TrustedContact> optionalTrustedContact =
+                        trustedContactRepository.findByUserIdAndContactUserId(user.getId(), contactUser.getId());
+                optionalTrustedContact.ifPresent(trustedContactRepository::delete);
+                if(optionalTrustedContact.isEmpty()){
+                    return new RemoveContactResponse("Contact not found");
+                }
+                return new RemoveContactResponse("Contact removed successfully");
+
+
+
+    }
+
+    private AddContactResponse saveTrustedContact(User user, User contactUser, String messageOnNotify) {
+        try {
             TrustedContact trustedContact = new TrustedContact();
             trustedContact.setUser(user);
             trustedContact.setContactUser(contactUser);
             trustedContact.setMessageOnNotify(messageOnNotify);
-            
-            try {
-                trustedContactRepository.save(trustedContact);
-                return new AddContactResponse(true, "Contact added successfully", true);
-            } catch (Exception e) {
-                return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), true);
-            }
-        } else {
-            try {
-                boolean emailSent = emailService.sendInvitationEmail(contactEmail, user.getFullName(), messageOnNotify);
-                boolean smsSent = smsService.sendInvitationSMS(contactPhone, user.getFullName(), messageOnNotify);
-                
-                return new AddContactResponse(true, "Contact added and invitations sent. Please " +
-                        "re-add Contact when they have created an account", false, emailSent, smsSent);
-            } catch (Exception e) {
-                return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), false);
-            }
+            trustedContactRepository.save(trustedContact);
+
+            return new AddContactResponse(true, "Contact added successfully", true);
+        } catch (Exception e) {
+            return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), true);
         }
     }
 
+    private AddContactResponse inviteNewContact(String email, String phone, String senderName, String messageOnNotify) {
+        try {
+            boolean emailSent = emailService.sendInvitationEmail(email, senderName, messageOnNotify);
+            boolean smsSent = smsService.sendInvitationSMS(phone, senderName, messageOnNotify);
 
+            return new AddContactResponse(
+                    true,
+                    "Contact added and invitations sent. Please re-add contact when they have created an account",
+                    false,
+                    emailSent,
+                    smsSent
+            );
+        } catch (Exception e) {
+            return new AddContactResponse(false, "Failed to add contact: " + e.getMessage(), false);
+        }
+    }
 
+    /**
+     * Adds a role to a user.
+     * 
+     * @param request The request containing the user ID, role type, and whether it should be primary
+     * @return UserRolesResponse with the user's updated roles
+     * @throws UserException If the user is not found or already has the role
+     */
+    public UserRolesResponse addRoleToUser(AddRoleRequest request) throws UserException {
+        return roleManagementService.addRoleToUser(request);
+    }
 
+    /**
+     * Removes a role from a user.
+     * 
+     * @param request The request containing the user ID and role type to remove
+     * @return UserRolesResponse with the user's updated roles
+     * @throws UserException If the user is not found, doesn't have the role, or it's their only role
+     */
+    public UserRolesResponse removeRoleFromUser(RemoveRoleRequest request) throws UserException {
+        return roleManagementService.removeRoleFromUser(request.getUserId(), request.getRoleType());
+    }
+
+    /**
+     * Gets a user's roles.
+     * 
+     * @param request The request containing the user ID
+     * @return UserRolesResponse with the user's roles
+     * @throws UserException If the user is not found
+     */
+    public UserRolesResponse getUserRoles(GetUserRolesRequest request) throws UserException {
+        return roleManagementService.getUserRoles(request.getUserId());
+    }
+
+    /**
+     * Checks if a user has a specific role.
+     * 
+     * @param request The request containing the user ID and role type to check
+     * @return true if the user has the role, false otherwise
+     */
+    public boolean userHasRole(CheckUserRolesRequest request) {
+        return roleManagementService.userHasRole(request.getUserId(), request.getRoleType());
+    }
+
+    /**
+     * Checks if a user has both USER and TRUSTED_CONTACT roles.
+     * 
+     * @param request The request containing the user ID
+     * @return true if the user has both roles, false otherwise
+     */
+    public boolean userHasBothRoles(CheckUserRolesRequest request) {
+        return roleManagementService.userHasBothRoles(request.getUserId());
+    }
+
+    /**
+     * Makes a user a trusted contact by adding the TRUSTED_CONTACT role.
+     * 
+     * @param request The request containing the user ID
+     * @return UserRolesResponse with the user's updated roles
+     * @throws UserException If the user is not found or already has the role
+     */
+    public UserRolesResponse makeTrustedContact(MakeTrustedContactRequest request) throws UserException {
+        return roleManagementService.makeTrustedContact(request.getUserId());
+    }
 }
