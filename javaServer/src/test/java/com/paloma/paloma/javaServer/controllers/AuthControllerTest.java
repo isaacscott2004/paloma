@@ -29,6 +29,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -101,15 +102,13 @@ public class AuthControllerTest {
 
     @Test
     void testRegisterSuccess() throws Exception {
-        RegisterResponse expectedResponse = new RegisterResponse(testUser, "Registration successful");
+        RegisterResponse expectedResponse = new RegisterResponse("Registration successful");
         when(userService.register(any(RegisterRequest.class))).thenReturn(expectedResponse);
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed-password");
 
         mockMvc.perform(post("/auth/register")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.user.username").value("testuser"))
                 .andExpect(jsonPath("$.message").value("Registration successful"));
 
         verify(userService).register(any(RegisterRequest.class));
@@ -138,7 +137,8 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.token").value("access-token"));
+                .andExpect(jsonPath("$.token").value("access-token"))
+                .andExpect(jsonPath("$.message").value("Successfully logged in"));
 
         verify(userService).login(any(LoginRequest.class));
     }
@@ -152,7 +152,8 @@ public class AuthControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.token").value("Invalid credentials"));
+                .andExpect(jsonPath("$.token").value("Invalid credentials"))
+                .andExpect(jsonPath("$.message").doesNotExist());
 
         verify(userService).login(any(LoginRequest.class));
     }
@@ -162,15 +163,13 @@ public class AuthControllerTest {
     // Unit tests for direct controller method calls
     @Test
     void testRegisterDirectCall() throws UserException {
-        RegisterResponse expectedResponse = new RegisterResponse(testUser, "Registration successful");
+        RegisterResponse expectedResponse = new RegisterResponse("Registration successful");
         when(userService.register(any(RegisterRequest.class))).thenReturn(expectedResponse);
-        when(passwordEncoder.encode(anyString())).thenReturn("hashed-password");
 
         ResponseEntity<RegisterResponse> response = authController.register(registerRequest);
 
         assertEquals(201, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals(testUser.getUsername(), response.getBody().getUser().getUsername());
         assertEquals("Registration successful", response.getBody().getMessage());
         verify(userService).register(registerRequest);
     }
@@ -180,11 +179,13 @@ public class AuthControllerTest {
         LoginResponse expectedResponse = new LoginResponse("access-token", "Successfully logged in");
         when(userService.login(any(LoginRequest.class))).thenReturn(expectedResponse);
 
-        ResponseEntity<JwtResponse> response = authController.login(loginRequest);
+        ResponseEntity<?> response = authController.login(loginRequest);
 
         assertEquals(200, response.getStatusCode().value());
         assertNotNull(response.getBody());
-        assertEquals("access-token", response.getBody().getToken());
+        JwtResponse jwtResponse = (JwtResponse) response.getBody();
+        assertEquals("access-token", jwtResponse.getToken());
+        assertEquals("Successfully logged in", jwtResponse.getMessage());
         verify(userService).login(loginRequest);
     }
 }
