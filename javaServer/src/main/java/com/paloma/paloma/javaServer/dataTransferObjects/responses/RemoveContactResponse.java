@@ -8,5 +8,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class RemoveContactResponse {
+    private boolean success;
     private String message;
+
+
 }

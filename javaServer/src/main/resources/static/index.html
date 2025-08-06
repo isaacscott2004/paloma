@@ -42,7 +42,7 @@
     </tr>
     <tr>
         <td class="endpoint" onclick="logout()">
-            <div class="method">[DELETE]</div>
+            <div class="method">[POST]</div>
             <div class="path">/insession/logout</div>
         </td>
         <td>
@@ -128,7 +128,17 @@
         </td>
         <td>
             <span class="description">User adds a trusted contact to their profile</span>
-            An authorization token is required. Requires email, phone, and optional messageOnNotify.
+            An authorization token is required. Requires email and optional messageOnNotify.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="removeContact()">
+            <div class="method">[DELETE]</div>
+            <div class="path">/insession/removeContact</div>
+        </td>
+        <td>
+            <span class="description">User removes a trusted contact from their profile</span>
+            An authorization token is required. Requires email of the contact to remove.
         </td>
     </tr>
     <tr>
@@ -162,16 +172,6 @@
         </td>
     </tr>
     <tr>
-        <td class="endpoint" onclick="updatePhone()">
-            <div class="method">[PUT]</div>
-            <div class="path">/insession/update/phone</div>
-        </td>
-        <td>
-            <span class="description">Updates user's phone number</span>
-            An authorization token is required. Requires newPhone in request body.
-        </td>
-    </tr>
-    <tr>
         <td class="endpoint" onclick="getContacts()">
             <div class="method">[GET]</div>
             <div class="path">/loggedIn</div>
@@ -179,52 +179,6 @@
         <td>
             <span class="description">Updates contact info</span>
             An authToken is required
-        </td>
-    </tr>
-    <tr>
-        <td class="endpoint" onclick="makeTrustedContact()">
-            <div class="method">[POST]</div>
-            <div class="path">/api/roles/make-trusted-contact/{userId}</div>
-        </td>
-        <td>
-            <span class="description">Make user a trusted contact</span> Adds TRUSTED_CONTACT role to an existing user.
-            User will have both USER and TRUSTED_CONTACT roles.
-        </td>
-    </tr>
-    <tr>
-        <td class="endpoint" onclick="getUserRoles()">
-            <div class="method">[GET]</div>
-            <div class="path">/api/roles/user/{userId}</div>
-        </td>
-        <td>
-            <span class="description">Get user roles</span> Returns all roles assigned to a user and their primary role.
-        </td>
-    </tr>
-    <tr>
-        <td class="endpoint" onclick="checkBothRoles()">
-            <div class="method">[GET]</div>
-            <div class="path">/api/roles/check/{userId}/has-both-roles</div>
-        </td>
-        <td>
-            <span class="description">Check if user has both roles</span> Returns true if user has both USER and TRUSTED_CONTACT roles.
-        </td>
-    </tr>
-    <tr>
-        <td class="endpoint" onclick="addRole()">
-            <div class="method">[POST]</div>
-            <div class="path">/api/roles/add</div>
-        </td>
-        <td>
-            <span class="description">Add role to user</span> Adds a specific role to an existing user. Can specify if it should be primary.
-        </td>
-    </tr>
-    <tr>
-        <td class="endpoint" onclick="removeRole()">
-            <div class="method">[DELETE]</div>
-            <div class="path">/api/roles/remove/{userId}/{roleType}</div>
-        </td>
-        <td>
-            <span class="description">Remove role from user</span> Removes a specific role from a user. Cannot remove the last role.
         </td>
     </tr>
     <tr>

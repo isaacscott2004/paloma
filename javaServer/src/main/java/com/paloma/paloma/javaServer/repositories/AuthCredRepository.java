@@ -12,5 +12,4 @@ import java.util.UUID;
 public interface AuthCredRepository extends JpaRepository<AuthCred, UUID> {
     AuthCred findByUserId(UUID id);
 
-    boolean existsByUserId(UUID id);
 }

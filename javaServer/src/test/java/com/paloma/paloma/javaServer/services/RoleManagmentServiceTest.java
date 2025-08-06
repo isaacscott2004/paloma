@@ -138,28 +138,6 @@ class RoleManagementServiceTest {
         assertFalse(hasBothRoles);
     }
 
-    @Test
-    void testMakeTrustedContact() throws UserException {
-        // Arrange
-        when(userRepository.findById(testUser.getId())).thenReturn(Optional.of(testUser));
-        when(userRoleRepository.findByUserAndRoleType(testUser, RoleType.TRUSTED_CONTACT))
-                .thenReturn(Optional.empty());
-        when(roleRepository.findByRoleType(RoleType.TRUSTED_CONTACT))
-                .thenReturn(Optional.of(trustedContactRole));
-        when(userRoleRepository.save(any(UserRole.class))).thenReturn(testTrustedContactRole);
-        when(userRoleRepository.findAllByUser(testUser))
-                .thenReturn(Arrays.asList(testUserRole, testTrustedContactRole));
-
-        // Act
-        UserRolesResponse response = roleManagementService.makeTrustedContact(testUser.getId());
-
-        // Assert
-        assertNotNull(response);
-        assertEquals(testUser.getId(), response.getUserId());
-        assertTrue(response.getRoles().contains(RoleType.TRUSTED_CONTACT));
-        assertTrue(response.getRoles().contains(RoleType.USER));
-        assertEquals(RoleType.USER, response.getPrimaryRole()); // Primary should remain USER
-    }
 
     @Test
     void testAddDuplicateRoleThrowsException() {

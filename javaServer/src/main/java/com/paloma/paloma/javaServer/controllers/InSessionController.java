@@ -4,6 +4,7 @@ import com.paloma.paloma.javaServer.controllers.accessToken.GetAccessToken;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.exceptions.UnauthorizedException;
@@ -78,7 +79,7 @@ public class InSessionController {
      * @param authHeader The Authorization header containing the access token
      * @return ResponseEntity with success message or error message
      */
-    @DeleteMapping("/logout")
+    @PostMapping("/logout")
     public ResponseEntity<?> logout(@RequestHeader("Authorization") String authHeader) {
         return executeWithUser(authHeader, user -> {
             refreshService.revokeTokens(user);
@@ -137,22 +138,6 @@ public class InSessionController {
     }
 
     /**
-     * Updates the phone number of an authenticated user.
-     * 
-     * @param authHeader The Authorization header containing the access token
-     * @param updatePhoneRequest The request containing the new phone number
-     * @return ResponseEntity with success message or error message
-     */
-    @PutMapping("/update/phone")
-    public ResponseEntity<?> updatePhone(@RequestHeader("Authorization") String authHeader,
-                                         @RequestBody UpdatePhoneRequest updatePhoneRequest) {
-        return executeWithUser(authHeader, user -> {
-            userService.updatePhone(user, updatePhoneRequest.getNewPhone());
-            return ResponseEntity.ok("Successfully updated phone");
-        });
-    }
-
-    /**
      * Adds a trusted contact for an authenticated user.
      * If the contact already exists in the system, a relationship is created.
      * If the contact doesn't exist, a new user is created and invitations are sent.
@@ -166,7 +151,7 @@ public class InSessionController {
                                         @RequestBody AddTrustedContactRequest addTrustedContactRequest){
         return executeWithUser(authHeader, user ->{
             AddContactResponse response = userService.addContact(user, addTrustedContactRequest.getEmail(),
-                    addTrustedContactRequest.getPhone(), addTrustedContactRequest.getMessageOnNotify());
+                    addTrustedContactRequest.getMessageOnNotify());
             
             if (response.isSuccess()) {
                 return ResponseEntity.ok(response);
@@ -175,6 +160,23 @@ public class InSessionController {
             }
         });
     }
+
+    @DeleteMapping("/removeContact")
+    public ResponseEntity<?> removeContact(@RequestHeader("Authorization") String authHeader, 
+                                           @RequestBody RemoveTrustedContactRequest removeTrustedContactRequest) {
+        return executeWithUser(authHeader, user -> {
+            RemoveContactResponse response = userService.
+                    removeContact(user, removeTrustedContactRequest.getEmail());
+
+            if (response.isSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+
+    }
+
 
     /**
      * Retrieves a user by their ID from a JWT token.

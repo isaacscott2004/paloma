@@ -83,7 +83,6 @@ public class AuthControllerTest {
         testUser.setId(UUID.randomUUID());
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
-        testUser.setPhone("+1234567890");
         testUser.setFullName("Test User");
         testUser.setCreatedAt(LocalDateTime.now());
 
@@ -91,7 +90,6 @@ public class AuthControllerTest {
         registerRequest.setUsername("testuser");
         registerRequest.setPassword("password123");
         registerRequest.setEmail("test@example.com");
-        registerRequest.setPhone("+1234567890");
         registerRequest.setFullName("Test User");
         registerRequest.setRoleType(RoleType.USER);
 

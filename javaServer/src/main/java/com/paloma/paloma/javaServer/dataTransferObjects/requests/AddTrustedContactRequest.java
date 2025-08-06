@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 public class AddTrustedContactRequest {
     private String email;
-    private String phone;
     private String messageOnNotify;
 
 }

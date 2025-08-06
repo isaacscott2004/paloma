@@ -119,7 +119,6 @@ function register() {
     username: 'testuser',
     password: 'password123',
     email: 'test@example.com',
-    phone: '+1234567890',
     fullName: 'Test User',
     roleType: 'USER'
   });
@@ -131,37 +130,12 @@ function login() {
   });
 }
 function logout() {
-  displayRequest('DELETE', '/insession/logout');
+  displayRequest('POST', '/insession/logout');
 }
 function refresh() {
   displayRequest('POST', '/insession/refresh');
 }
 
-// Role Management
-function roleEndpoint(endpoint, method = 'GET', body = null) {
-  const userId = localStorage.getItem('userId') || 'user-id-here';
-  displayRequest(method, endpoint.replace('{userId}', userId), body);
-}
-
-function makeTrustedContact() {
-  roleEndpoint('/api/roles/make-trusted-contact/{userId}', 'POST');
-}
-function getUserRoles() {
-  roleEndpoint('/api/roles/user/{userId}');
-}
-function checkBothRoles() {
-  roleEndpoint('/api/roles/check/{userId}/has-both-roles');
-}
-function addRole() {
-  roleEndpoint('/api/roles/add', 'POST', {
-    userId: localStorage.getItem('userId') || 'user-id-here',
-    roleType: 'TRUSTED_CONTACT',
-    primary: false
-  });
-}
-function removeRole() {
-  roleEndpoint('/api/roles/remove/{userId}/TRUSTED_CONTACT', 'DELETE');
-}
 
 // Check-in & Medications
 function dailyCheckIn() {
@@ -190,8 +164,12 @@ function getMedications() {
 function addContact() {
   displayRequest('POST', '/insession/addContact', { 
     email: 'isaacscottirwin@gmail.com',
-    phone: '+18777804236',
     messageOnNotify: 'Please help me if I need support' 
+  });
+}
+function removeContact() {
+  displayRequest('DELETE', '/insession/removeContact', { 
+    email: 'isaacscottirwin@gmail.com'
   });
 }
 function updateEmail() {
@@ -205,9 +183,6 @@ function updatePassword() {
 }
 function updateUsername() {
   displayRequest('PUT', '/insession/update/username', { newUsername: 'newUsername' });
-}
-function updatePhone() {
-  displayRequest('PUT', '/insession/update/phone', { newPhone: '+9876543210' });
 }
 function getContacts() {
   displayRequest('GET', '/loggedIn');

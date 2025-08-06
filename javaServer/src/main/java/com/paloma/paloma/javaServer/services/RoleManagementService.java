@@ -124,15 +124,7 @@ public class RoleManagementService {
         return userHasRole(userId, RoleType.USER) && userHasRole(userId, RoleType.TRUSTED_CONTACT);
     }
 
-    @Transactional
-    public UserRolesResponse makeTrustedContact(UUID userId) throws UserException {
-        AddRoleRequest request = new AddRoleRequest();
-        request.setUserId(userId);
-        request.setRoleType(RoleType.TRUSTED_CONTACT);
-        request.setPrimary(false); // Keep existing primary role
 
-        return addRoleToUser(request);
-    }
 
     private void updatePrimaryRole(User user, RoleType newPrimaryRoleType) {
         // Remove primary flag from all existing roles
