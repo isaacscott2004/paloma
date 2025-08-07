@@ -22,7 +22,6 @@ public class DbClearService {
     private final DailyCheckinRepository dailyCheckinRepository;
     private final MedLogRepository medLogRepository;
     private final MedicationRepository medicationRepository;
-    private final ScoreHistoryRepository scoreHistoryRepository;
     private final TrustedContactRepository trustedContactRepository;
 
     /**
@@ -42,8 +41,7 @@ public class DbClearService {
         refreshAuthRepository.deleteAll();
         authCredRepository.deleteAll();
         userRoleRepository.deleteAll();
-        
-        // Delete trusted contacts before users since trusted contacts reference users
+        dailyCheckinRepository.deleteAll();
         trustedContactRepository.deleteAll();
         
         // Then clear parent entities

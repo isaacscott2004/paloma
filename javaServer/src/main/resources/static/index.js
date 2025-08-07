@@ -139,11 +139,12 @@ function refresh() {
 
 // Check-in & Medications
 function dailyCheckIn() {
-  displayRequest('POST', '/loggedIn', {
-    scoreOne: 'scoreOne',
-    scoreTwo: 'scoreTwo',
-    scoreThree: 'scoreThree',
-    scoreFour: 'scoreFour'
+  displayRequest('POST', '/insession/dailyCheckin', {
+    moodScore: 8,
+    energyScore: 7,
+    motivationScore: 6,
+    suicidalScore: 2,
+    notes: "Feeling pretty good today"
   });
 }
 function getScore() {

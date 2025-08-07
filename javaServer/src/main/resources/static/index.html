@@ -64,11 +64,11 @@
     <tr>
         <td class="endpoint" onclick="dailyCheckIn()">
             <div class="method">[POST]</div>
-            <div class="path">/loggedIn</div>
+            <div class="path">/insession/dailyCheckin</div>
         </td>
         <td>
-            <span class="description">Prompts the user to fill out their daily check-in</span>
-            An authToken is required
+            <span class="description">Submits a daily check-in with mood, energy, motivation, and suicidal scores</span>
+            An authorization token is required. Requires scores and optional notes.
         </td>
     </tr>
     <tr>
