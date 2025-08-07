@@ -3,8 +3,10 @@ package com.paloma.paloma.javaServer.controllers;
 import com.paloma.paloma.javaServer.controllers.accessToken.GetAccessToken;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.DailyCheckinResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
+import com.paloma.paloma.javaServer.entities.DailyCheckin;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.exceptions.UnauthorizedException;
@@ -171,6 +173,26 @@ public class InSessionController {
             if (response.isSuccess()) {
                 return ResponseEntity.ok(response);
             } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+
+    }
+
+    @PostMapping("/dailyCheckin")
+    public ResponseEntity<?> dailyCheckin(@RequestHeader("Authorization") String authHeader,
+                                          @RequestBody DailyCheckinRequest dailyCheckinRequest) {
+        Integer energyScore = dailyCheckinRequest.getEnergyScore();
+        Integer moodScore = dailyCheckinRequest.getMoodScore();
+        Integer motivationScore = dailyCheckinRequest.getMotivationScore();
+        Integer suicidalScore = dailyCheckinRequest.getSuicidalScore();
+        String notes = dailyCheckinRequest.getNotes();
+        return executeWithUser(authHeader, user -> {
+            DailyCheckinResponse response = userService.dailyCheckin(user, moodScore, energyScore,
+                    motivationScore, suicidalScore, notes);
+            if(response.isSuccess()){
+                return ResponseEntity.ok(response);
+            } else{
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
             }
         });

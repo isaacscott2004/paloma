@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.DailyCheckinResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
@@ -374,5 +375,51 @@ public class InSessionControllerTest {
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).updatePassword(testUser, "wrongpassword", "newpassword");
+    }
+    
+    @Test
+    void testDailyCheckinSuccess() throws Exception {
+        DailyCheckinRequest dailyCheckinRequest = new DailyCheckinRequest(8, 7, 6, 2, "Feeling good today");
+        DailyCheckinResponse successResponse = new DailyCheckinResponse(true, "Daily checkin recorded successfully");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.dailyCheckin(eq(testUser), eq(8), eq(7), eq(6), eq(2), eq("Feeling good today")))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(post("/insession/dailyCheckin")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dailyCheckinRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Daily checkin recorded successfully"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).dailyCheckin(testUser, 8, 7, 6, 2, "Feeling good today");
+    }
+    
+    @Test
+    void testDailyCheckinFailure() throws Exception {
+        DailyCheckinRequest dailyCheckinRequest = new DailyCheckinRequest(12, 7, 6, 2, "Invalid mood score");
+        DailyCheckinResponse failureResponse = new DailyCheckinResponse(false, "Mood score must be less than or equal to 10");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.dailyCheckin(eq(testUser), eq(12), eq(7), eq(6), eq(2), eq("Invalid mood score")))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(post("/insession/dailyCheckin")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(dailyCheckinRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Mood score must be less than or equal to 10"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).dailyCheckin(testUser, 12, 7, 6, 2, "Invalid mood score");
     }
 }

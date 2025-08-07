@@ -46,9 +46,9 @@ public class DailyCheckin {
     private Integer suicidalScore;
 
     @Min(value = 0, message = "Total score must be greater than or equal to 0")
-    @Max(value = 40, message = "Total score must be less than or equal to 40")
+    @Max(value = 10, message = "Total score must be less than or equal to 40")
     @Column(name = "total_score")
-    private Integer totalScore;
+    private Double totalScore;
 
     @Column(name = "notes", columnDefinition = "TEXT")
     private String notes;
@@ -64,7 +64,7 @@ public class DailyCheckin {
         this.energyScore = energyScore;
         this.motivationScore = motivationScore;
         this.suicidalScore = suicidalScore;
-        this.totalScore = scoreSum(moodScore, energyScore, motivationScore, suicidalScore);
+        this.totalScore = scoreSum(moodScore, energyScore, motivationScore, suicidalScore)/4.0;
         this.notes = notes;
         this.createdAt = LocalDateTime.now();
     }

@@ -110,10 +110,4 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Alert> alerts;
 
-    /**
-     * The score history records for this user.
-     */
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<ScoreHistory> scoreHistories;
-
 }

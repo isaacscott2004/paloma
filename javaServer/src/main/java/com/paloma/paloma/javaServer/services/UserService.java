@@ -3,10 +3,7 @@ package com.paloma.paloma.javaServer.services;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.AddRoleRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.LoginRequest;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.LoginResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.RegisterResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.*;
 import com.paloma.paloma.javaServer.entities.*;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
@@ -18,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +52,10 @@ public class UserService {
     private final EmailService emailService;
 
     private final RoleManagementService roleManagementService;
+
+    private final DailyCheckinRepository dailyCheckinRepository;
+
+
 
     private final JwtUtil jwtUtil;
 
@@ -256,6 +258,19 @@ public class UserService {
         return new RemoveContactResponse(true, "Contact removed successfully");
 
 
+    }
+
+    @Transactional
+    public DailyCheckinResponse dailyCheckin(User user, Integer moodScore, Integer energyScore,
+                                             Integer motivationScore, Integer suicidalScore, String notes) {
+        try {
+            DailyCheckin dailyCheckin = new DailyCheckin(user, LocalDate.now(), moodScore,
+                    energyScore, motivationScore, suicidalScore, notes);
+            dailyCheckinRepository.save(dailyCheckin);
+            return new DailyCheckinResponse(true, "Daily checkin recorded successfully");
+        } catch (Exception e) {
+            return new DailyCheckinResponse(false, e.getMessage());
+        }
     }
 
     private AddContactResponse saveTrustedContact(User user, User contactUser, String messageOnNotify) {
