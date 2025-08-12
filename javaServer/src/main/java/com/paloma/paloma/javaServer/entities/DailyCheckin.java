@@ -63,7 +63,10 @@ public class DailyCheckin {
         this.moodScore = moodScore;
         this.energyScore = energyScore;
         this.motivationScore = motivationScore;
-        this.suicidalScore = suicidalScore;
+        // for scoring system a high number is good, but for suicidal score a low number means
+        // less suicidal thus subtract by 10 to get "inverse" thus it's good for scoring system
+        // and easy to understand for the user
+        this.suicidalScore = 10 - suicidalScore;
         this.totalScore = scoreSum(moodScore, energyScore, motivationScore, suicidalScore)/4.0;
         this.notes = notes;
         this.createdAt = LocalDateTime.now();
