@@ -224,6 +224,27 @@ public class InSessionController {
 
     }
 
+    @GetMapping("/dailyCheckin/getOverallScores")
+    public ResponseEntity<?> getOverallScores(@RequestHeader("Authorization") String authHeader,
+                                              @RequestBody GetOverallScoresRequest getOverallScoresRequest) {
+        Integer days = getOverallScoresRequest.getNumberOfDays();
+
+        return executeWithUser(authHeader, user -> {
+            GetOverallScoresResponse response = userService.getOverallScores(user, days);
+
+            if (!response.isSuccess()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+
+            if (response.getScores() == null || response.getScores().isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+
+            return ResponseEntity.ok(response);
+        });
+    }
+
+
 
 
 

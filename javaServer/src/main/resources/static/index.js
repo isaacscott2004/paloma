@@ -147,6 +147,11 @@ function dailyCheckIn() {
     notes: "Feeling pretty good today"
   });
 }
+function getOverallScores() {
+  displayRequest('GET', '/insession/dailyCheckin/getOverallScores', {
+    numberOfDays: 7
+  });
+}
 function getScore() {
   displayRequest('GET', '/loggedIn');
 }
