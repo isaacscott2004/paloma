@@ -6,6 +6,7 @@ import com.paloma.paloma.javaServer.dataTransferObjects.requests.RegisterRequest
 import com.paloma.paloma.javaServer.dataTransferObjects.responses.*;
 import com.paloma.paloma.javaServer.entities.*;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
+import com.paloma.paloma.javaServer.entities.enums.SensitivityLevel;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
 import com.paloma.paloma.javaServer.repositories.*;
@@ -55,7 +56,7 @@ public class UserService {
 
     private final DailyCheckinRepository dailyCheckinRepository;
 
-
+    private final AlertSensitivityRepository alertSensitivityRepository;
 
     private final JwtUtil jwtUtil;
 
@@ -194,6 +195,18 @@ public class UserService {
         userRepository.save(user);
     }
 
+    @Transactional
+    public UpdateAlertSensitivityResponse updateSensitivity(User user, SensitivityLevel sensitivity){
+        try {
+            AlertSensitivity alertSensitivity = alertSensitivityRepository.getReferenceById(user.getId());
+            alertSensitivity.setSensitivityLevel(sensitivity);
+            alertSensitivityRepository.save(alertSensitivity);
+            return new UpdateAlertSensitivityResponse(true, "Alert sensitivity updated successfully");
+        } catch (Exception e) {
+            return new UpdateAlertSensitivityResponse(false, e.getMessage());
+        }
+    }
+
     /**
      * Adds a trusted contact for a user.
      * If the contact already exists in the system, a relationship is created.
@@ -271,6 +284,20 @@ public class UserService {
         } catch (Exception e) {
             return new DailyCheckinResponse(false, e.getMessage());
         }
+    }
+
+    @Transactional
+    public AddAlertSensitivityResponse addAlertSensitivity(User user, SensitivityLevel sensitivity) {
+        try {
+            AlertSensitivity alertSensitivity = new AlertSensitivity();
+            alertSensitivity.setSensitivityLevel(sensitivity);
+            alertSensitivity.setUser(user);
+            alertSensitivityRepository.save(alertSensitivity);
+            return new AddAlertSensitivityResponse(true, "Alert sensitivity added successfully");
+        } catch (Exception e) {
+            return new AddAlertSensitivityResponse(false, e.getMessage());
+        }
+
     }
 
     private AddContactResponse saveTrustedContact(User user, User contactUser, String messageOnNotify) {

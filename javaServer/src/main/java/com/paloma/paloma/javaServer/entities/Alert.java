@@ -61,4 +61,6 @@ public class Alert {
      */
     @Column(name = "was_sent")
     private Boolean wasSent;
+
+
 }

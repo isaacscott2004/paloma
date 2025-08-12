@@ -3,10 +3,8 @@ package com.paloma.paloma.javaServer.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.DailyCheckinResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.*;
+import com.paloma.paloma.javaServer.entities.enums.SensitivityLevel;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
@@ -203,7 +201,7 @@ public class InSessionControllerTest {
                 eq("Please help me if I need support")))
                 .thenReturn(successResponse);
 
-        mockMvc.perform(post("/insession/addContact")
+        mockMvc.perform(post("/insession/add/contact")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addTrustedContactRequest)))
@@ -231,7 +229,7 @@ public class InSessionControllerTest {
                 eq("Please help me if I need support")))
                 .thenReturn(successResponse);
 
-        mockMvc.perform(post("/insession/addContact")
+        mockMvc.perform(post("/insession/add/contact")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addTrustedContactRequest)))
@@ -259,7 +257,7 @@ public class InSessionControllerTest {
                 eq("Please help me if I need support")))
                 .thenReturn(failureResponse);
 
-        mockMvc.perform(post("/insession/addContact")
+        mockMvc.perform(post("/insession/add/contact")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(addTrustedContactRequest)))
@@ -286,7 +284,7 @@ public class InSessionControllerTest {
         when(userService.removeContact(eq(testUser), eq("contact@example.com")))
                 .thenReturn(successResponse);
 
-        mockMvc.perform(delete("/insession/removeContact")
+        mockMvc.perform(delete("/insession/remove/contact")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(removeTrustedContactRequest)))
@@ -312,7 +310,7 @@ public class InSessionControllerTest {
         when(userService.removeContact(eq(testUser), eq("nonexistent@example.com")))
                 .thenReturn(failureResponse);
 
-        mockMvc.perform(delete("/insession/removeContact")
+        mockMvc.perform(delete("/insession/remove/contact")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(removeTrustedContactRequest)))
@@ -421,5 +419,97 @@ public class InSessionControllerTest {
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).dailyCheckin(testUser, 12, 7, 6, 2, "Invalid mood score");
+    }
+    
+    @Test
+    void testAddAlertSensitivitySuccess() throws Exception {
+        AddAlertSensitivityRequest addAlertSensitivityRequest = new AddAlertSensitivityRequest(SensitivityLevel.MEDIUM);
+        AddAlertSensitivityResponse successResponse = new AddAlertSensitivityResponse(true, "Alert sensitivity added successfully");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addAlertSensitivity(eq(testUser), eq(SensitivityLevel.MEDIUM)))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(post("/insession/add/sensitivityLevel")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addAlertSensitivityRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Alert sensitivity added successfully"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addAlertSensitivity(testUser, SensitivityLevel.MEDIUM);
+    }
+    
+    @Test
+    void testAddAlertSensitivityFailure() throws Exception {
+        AddAlertSensitivityRequest addAlertSensitivityRequest = new AddAlertSensitivityRequest(SensitivityLevel.HIGH);
+        AddAlertSensitivityResponse failureResponse = new AddAlertSensitivityResponse(false, "Alert sensitivity already exists for this user");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addAlertSensitivity(eq(testUser), eq(SensitivityLevel.HIGH)))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(post("/insession/add/sensitivityLevel")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addAlertSensitivityRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Alert sensitivity already exists for this user"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addAlertSensitivity(testUser, SensitivityLevel.HIGH);
+    }
+    
+    @Test
+    void testUpdateAlertSensitivitySuccess() throws Exception {
+        UpdateAlertSensitivityRequest updateAlertSensitivityRequest = new UpdateAlertSensitivityRequest(SensitivityLevel.LOW);
+        UpdateAlertSensitivityResponse successResponse = new UpdateAlertSensitivityResponse(true, "Alert sensitivity updated successfully");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.updateSensitivity(eq(testUser), eq(SensitivityLevel.LOW)))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(put("/insession/update/sensitivityLevel")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateAlertSensitivityRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Alert sensitivity updated successfully"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).updateSensitivity(testUser, SensitivityLevel.LOW);
+    }
+    
+    @Test
+    void testUpdateAlertSensitivityFailure() throws Exception {
+        UpdateAlertSensitivityRequest updateAlertSensitivityRequest = new UpdateAlertSensitivityRequest(SensitivityLevel.HIGH);
+        UpdateAlertSensitivityResponse failureResponse = new UpdateAlertSensitivityResponse(false, "Alert sensitivity not found for this user");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.updateSensitivity(eq(testUser), eq(SensitivityLevel.HIGH)))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(put("/insession/update/sensitivityLevel")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updateAlertSensitivityRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Alert sensitivity not found for this user"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).updateSensitivity(testUser, SensitivityLevel.HIGH);
     }
 }

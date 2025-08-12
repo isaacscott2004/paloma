@@ -2,11 +2,7 @@ package com.paloma.paloma.javaServer.controllers;
 
 import com.paloma.paloma.javaServer.controllers.accessToken.GetAccessToken;
 import com.paloma.paloma.javaServer.dataTransferObjects.requests.*;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.AddContactResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.DailyCheckinResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.JwtResponse;
-import com.paloma.paloma.javaServer.dataTransferObjects.responses.RemoveContactResponse;
-import com.paloma.paloma.javaServer.entities.DailyCheckin;
+import com.paloma.paloma.javaServer.dataTransferObjects.responses.*;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
 import com.paloma.paloma.javaServer.exceptions.UnauthorizedException;
@@ -123,6 +119,21 @@ public class InSessionController {
         });
     }
 
+    @PutMapping("/update/sensitivityLevel")
+    public ResponseEntity<?> updateSensitivityLevel(@RequestHeader("Authorization") String authHeader,
+                                                    @RequestBody UpdateAlertSensitivityRequest
+                                                            updateAlertSensitivityRequest) {
+        return executeWithUser(authHeader, user -> {
+            UpdateAlertSensitivityResponse response = userService.updateSensitivity(user,
+                    updateAlertSensitivityRequest.getSensitivityLevel());
+            if (response.isSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+    }
+
     /**
      * Updates the username of an authenticated user.
      * 
@@ -148,7 +159,7 @@ public class InSessionController {
      * @param addTrustedContactRequest The request containing contact details
      * @return ResponseEntity with success/failure response and details
      */
-    @PostMapping("/addContact")
+    @PostMapping("/add/contact")
     public ResponseEntity<?> addContact(@RequestHeader("Authorization") String authHeader,
                                         @RequestBody AddTrustedContactRequest addTrustedContactRequest){
         return executeWithUser(authHeader, user ->{
@@ -163,7 +174,21 @@ public class InSessionController {
         });
     }
 
-    @DeleteMapping("/removeContact")
+    @PostMapping("/add/sensitivityLevel")
+    public ResponseEntity<?> addSensitivityLevel(@RequestHeader("Authorization") String authHeader,
+                                                 @RequestBody AddAlertSensitivityRequest addAlertSensitivityRequest){
+        return executeWithUser(authHeader, user -> {
+            AddAlertSensitivityResponse response = userService.addAlertSensitivity(user,
+                    addAlertSensitivityRequest.getSensitivityLevel());
+            if (response.isSuccess()) {
+                return ResponseEntity.ok(response);
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+    }
+
+    @DeleteMapping("/remove/contact")
     public ResponseEntity<?> removeContact(@RequestHeader("Authorization") String authHeader, 
                                            @RequestBody RemoveTrustedContactRequest removeTrustedContactRequest) {
         return executeWithUser(authHeader, user -> {
@@ -198,6 +223,8 @@ public class InSessionController {
         });
 
     }
+
+
 
 
     /**
