@@ -1,18 +1,20 @@
 package com.paloma.paloma.javaServer.entities;
 
+import com.paloma.paloma.javaServer.entities.enums.SensitivityLevel;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
+@Table(name = "alert_sensitivity")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class RefreshAuth {
+public class AlertSensitivity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
@@ -21,10 +23,11 @@ public class RefreshAuth {
     @JoinColumn(name = "user_id", nullable = false, unique = true)
     private User user;
 
-    @Column(nullable = false, unique = true)
-    private String token;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "sensitivity_level")
+    private SensitivityLevel sensitivityLevel;
 
-    @Column(nullable = false)
-    private LocalDateTime expiryDate;
+
+
+
 }
-

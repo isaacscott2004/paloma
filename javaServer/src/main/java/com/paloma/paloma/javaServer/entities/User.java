@@ -110,4 +110,10 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Alert> alerts;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private RefreshAuth refreshAuth;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private AlertSensitivity alertSensitivity;
+
 }

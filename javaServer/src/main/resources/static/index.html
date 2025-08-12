@@ -124,7 +124,7 @@
     <tr>
         <td class="endpoint" onclick="addContact()">
             <div class="method">[POST]</div>
-            <div class="path">/insession/addContact</div>
+            <div class="path">/insession/add/contact</div>
         </td>
         <td>
             <span class="description">User adds a trusted contact to their profile</span>
@@ -134,11 +134,31 @@
     <tr>
         <td class="endpoint" onclick="removeContact()">
             <div class="method">[DELETE]</div>
-            <div class="path">/insession/removeContact</div>
+            <div class="path">/insession/remove/contact</div>
         </td>
         <td>
             <span class="description">User removes a trusted contact from their profile</span>
             An authorization token is required. Requires email of the contact to remove.
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="addAlertSensitivity()">
+            <div class="method">[POST]</div>
+            <div class="path">/insession/add/sensitivityLevel</div>
+        </td>
+        <td>
+            <span class="description">User adds an alert sensitivity level to their profile</span>
+            An authorization token is required. Requires sensitivityLevel (LOW, MEDIUM, or HIGH).
+        </td>
+    </tr>
+    <tr>
+        <td class="endpoint" onclick="updateAlertSensitivity()">
+            <div class="method">[PUT]</div>
+            <div class="path">/insession/update/sensitivityLevel</div>
+        </td>
+        <td>
+            <span class="description">User updates their alert sensitivity level</span>
+            An authorization token is required. Requires sensitivityLevel (LOW, MEDIUM, or HIGH).
         </td>
     </tr>
     <tr>

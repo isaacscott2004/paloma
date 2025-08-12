@@ -163,14 +163,24 @@ function getMedications() {
   displayRequest('GET', '/loggedIn');
 }
 function addContact() {
-  displayRequest('POST', '/insession/addContact', { 
+  displayRequest('POST', '/insession/add/contact', { 
     email: 'isaacscottirwin@gmail.com',
     messageOnNotify: 'Please help me if I need support' 
   });
 }
 function removeContact() {
-  displayRequest('DELETE', '/insession/removeContact', { 
+  displayRequest('DELETE', '/insession/remove/contact', { 
     email: 'isaacscottirwin@gmail.com'
+  });
+}
+function addAlertSensitivity() {
+  displayRequest('POST', '/insession/add/sensitivityLevel', {
+    sensitivityLevel: 'MEDIUM'
+  });
+}
+function updateAlertSensitivity() {
+  displayRequest('PUT', '/insession/update/sensitivityLevel', {
+    sensitivityLevel: 'HIGH'
   });
 }
 function updateEmail() {
