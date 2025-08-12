@@ -8,11 +8,15 @@ import com.paloma.paloma.javaServer.entities.*;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import com.paloma.paloma.javaServer.entities.enums.SensitivityLevel;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
+import com.paloma.paloma.javaServer.exceptions.NoDailyCheckinsFoundException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
 import com.paloma.paloma.javaServer.repositories.*;
 import com.paloma.paloma.javaServer.utilites.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -298,6 +302,25 @@ public class UserService {
             return new AddAlertSensitivityResponse(false, e.getMessage());
         }
 
+    }
+
+    @Transactional
+    public GetOverallScoresResponse getOverallScores(User user, Integer days) {
+        UUID userId = user.getId();
+        Pageable pageable = PageRequest.of(0, days);
+        List<Integer> latestOverallScores = dailyCheckinRepository.findLatestOverallScoresByUserId(userId, pageable);
+
+        if (latestOverallScores.isEmpty()) {
+            // No scores found — let controller return 204
+            return new GetOverallScoresResponse(true, "No scores found", latestOverallScores);
+        }
+
+        if (latestOverallScores.size() < days) {
+            return new GetOverallScoresResponse(true,
+                    "Only " + latestOverallScores.size() + " days of scores were found.", latestOverallScores);
+        }
+
+        return new GetOverallScoresResponse(true, "Scores retrieved successfully", latestOverallScores);
     }
 
     private AddContactResponse saveTrustedContact(User user, User contactUser, String messageOnNotify) {

@@ -7,6 +7,10 @@ import com.paloma.paloma.javaServer.dataTransferObjects.responses.*;
 import com.paloma.paloma.javaServer.entities.enums.SensitivityLevel;
 import com.paloma.paloma.javaServer.entities.RefreshAuth;
 import com.paloma.paloma.javaServer.entities.User;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
 import com.paloma.paloma.javaServer.exceptions.UnauthorizedException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
@@ -30,6 +34,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
@@ -511,5 +516,78 @@ public class InSessionControllerTest {
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).updateSensitivity(testUser, SensitivityLevel.HIGH);
+    }
+    
+    @Test
+    void testGetOverallScoresSuccess() throws Exception {
+        GetOverallScoresRequest getOverallScoresRequest = new GetOverallScoresRequest(7);
+        List<Integer> scores = Arrays.asList(75, 80, 85, 70, 90, 85, 80);
+        GetOverallScoresResponse successResponse = new GetOverallScoresResponse(true, "Scores retrieved successfully", scores);
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.getOverallScores(eq(testUser), eq(7)))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(get("/insession/dailyCheckin/getOverallScores")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(getOverallScoresRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Scores retrieved successfully"))
+                .andExpect(jsonPath("$.scores").isArray())
+                .andExpect(jsonPath("$.scores", hasSize(7)))
+                .andExpect(jsonPath("$.scores[0]").value(75))
+                .andExpect(jsonPath("$.scores[6]").value(80));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).getOverallScores(testUser, 7);
+    }
+    
+    @Test
+    void testGetOverallScoresNoContent() throws Exception {
+        GetOverallScoresRequest getOverallScoresRequest = new GetOverallScoresRequest(7);
+        List<Integer> emptyScores = Collections.emptyList();
+        GetOverallScoresResponse emptyResponse = new GetOverallScoresResponse(true, "No scores found", emptyScores);
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.getOverallScores(eq(testUser), eq(7)))
+                .thenReturn(emptyResponse);
+
+        mockMvc.perform(get("/insession/dailyCheckin/getOverallScores")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(getOverallScoresRequest)))
+                .andExpect(status().isNoContent());
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).getOverallScores(testUser, 7);
+    }
+    
+    @Test
+    void testGetOverallScoresFailure() throws Exception {
+        GetOverallScoresRequest getOverallScoresRequest = new GetOverallScoresRequest(-1); // Invalid number of days
+        GetOverallScoresResponse failureResponse = new GetOverallScoresResponse(false, "Number of days must be positive", null);
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.getOverallScores(eq(testUser), eq(-1)))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(get("/insession/dailyCheckin/getOverallScores")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(getOverallScoresRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Number of days must be positive"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).getOverallScores(testUser, -1);
     }
 }
