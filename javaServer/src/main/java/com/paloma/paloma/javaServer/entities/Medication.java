@@ -43,7 +43,17 @@ public class Medication {
     private LocalDateTime createdAt;
 
     //Relationships
-    @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "medication", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<MedLog> medLogs;
+
+    public void addMedLog(MedLog medLog) {
+        medLogs.add(medLog);
+        medLog.setMedication(this); // keeps the relationship consistent
+    }
+
+    public void removeMedLog(MedLog medLog) {
+        medLogs.remove(medLog);
+        medLog.setMedication(null);
+    }
 
 }
