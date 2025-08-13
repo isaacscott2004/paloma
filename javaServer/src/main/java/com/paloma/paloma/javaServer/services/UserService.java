@@ -62,7 +62,12 @@ public class UserService {
 
     private final AlertSensitivityRepository alertSensitivityRepository;
 
+    private final MedicationRepository medicationRepository;
+
+    private final MedLogRepository medLogRepository;
+
     private final JwtUtil jwtUtil;
+
 
 
 
@@ -322,6 +327,50 @@ public class UserService {
 
         return new GetOverallScoresResponse(true, "Scores retrieved successfully", latestOverallScores);
     }
+
+    @Transactional
+    public AddMedicationResponse addMedication(User user, String medicationName, String dosage, String schedule){
+        try{
+            Medication medication = new Medication();
+            medication.setUser(user);
+            medication.setName(medicationName);
+            medication.setDosage(dosage);
+            medication.setDailySchedule(schedule);
+            medication.setIsActive(true);
+            medication.setCreatedAt(LocalDateTime.now());
+            medicationRepository.save(medication);
+            return new AddMedicationResponse(true, "Medication added successfully");
+        } catch (Exception e) {
+            return new AddMedicationResponse(false, "Failed to add medication " + e.getMessage());
+        }
+
+    }
+
+    @Transactional
+    public AddMedicationLogResponse addMedicationLog(User user, String medicationName){
+        try{
+            Optional<Medication> medicationOptional = medicationRepository.findByNameAndUserId(medicationName,
+                    user.getId());
+            if(medicationOptional.isPresent()){
+                Medication medication = medicationOptional.get();
+                MedLog medLog = new MedLog();
+                medLog.setUser(user);
+                medLog.setMedication(medication);
+                medLog.setDate(LocalDate.now());
+                medLog.setTaken(true);
+                medLog.setCreatedAt(LocalDateTime.now());
+                medLogRepository.save(medLog);
+                medication.addMedLog(medLog);
+                return new AddMedicationLogResponse(true, "Medication log added successfully");
+            } else {
+                return new AddMedicationLogResponse(false, "Medication not found");
+            }
+
+        } catch (Exception e) {
+            return new AddMedicationLogResponse(false, "Failed to add medication log " + e.getMessage());
+        }
+    }
+
 
     private AddContactResponse saveTrustedContact(User user, User contactUser, String messageOnNotify) {
         try {

@@ -204,7 +204,7 @@ public class InSessionController {
 
     }
 
-    @PostMapping("/dailyCheckin")
+    @PostMapping("/daily/checkin")
     public ResponseEntity<?> dailyCheckin(@RequestHeader("Authorization") String authHeader,
                                           @RequestBody DailyCheckinRequest dailyCheckinRequest) {
         Integer energyScore = dailyCheckinRequest.getEnergyScore();
@@ -224,7 +224,7 @@ public class InSessionController {
 
     }
 
-    @GetMapping("/dailyCheckin/getOverallScores")
+    @GetMapping("/daily/checkin/getOverallScores")
     public ResponseEntity<?> getOverallScores(@RequestHeader("Authorization") String authHeader,
                                               @RequestBody GetOverallScoresRequest getOverallScoresRequest) {
         Integer days = getOverallScoresRequest.getNumberOfDays();
@@ -244,9 +244,35 @@ public class InSessionController {
         });
     }
 
+    @PostMapping("/add/medication")
+    public ResponseEntity<?> addMedication(@RequestHeader("Authorization") String authHeader,
+                                           @RequestBody AddMedicationRequest addMedicationRequest) {
+        String medicationName = addMedicationRequest.getMedicationName().toLowerCase();
+        String dosage = addMedicationRequest.getDosage();
+        String schedule = addMedicationRequest.getSchedule();
+        return executeWithUser(authHeader, user -> {
+            AddMedicationResponse response = userService.addMedication(user, medicationName, dosage, schedule);
+            if(response.isSuccess()){
+                return ResponseEntity.ok(response);
+            } else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+    }
 
-
-
+    @PostMapping("/daily/medlog")
+    public ResponseEntity<?> dailyMedLog(@RequestHeader("Authorization") String authHeader,
+                                         @RequestBody AddMedicationLogRequest addMedicationLogRequest) {
+        String medicationName = addMedicationLogRequest.getMedicationName().toLowerCase();
+        return executeWithUser(authHeader, user -> {
+            AddMedicationLogResponse response = userService.addMedicationLog(user,medicationName);
+            if(response.isSuccess()){
+                return ResponseEntity.ok(response);
+            } else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+    }
 
     /**
      * Retrieves a user by their ID from a JWT token.
