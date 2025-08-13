@@ -529,7 +529,7 @@ public class InSessionControllerTest {
         when(userService.getOverallScores(eq(testUser), eq(7)))
                 .thenReturn(successResponse);
 
-        mockMvc.perform(get("/insession/dailyCheckin/getOverallScores")
+        mockMvc.perform(get("/insession/daily/checkin/getOverallScores")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(getOverallScoresRequest)))
@@ -557,7 +557,7 @@ public class InSessionControllerTest {
         when(userService.getOverallScores(eq(testUser), eq(7)))
                 .thenReturn(emptyResponse);
 
-        mockMvc.perform(get("/insession/dailyCheckin/getOverallScores")
+        mockMvc.perform(get("/insession/daily/checkin/getOverallScores")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(getOverallScoresRequest)))
@@ -578,7 +578,7 @@ public class InSessionControllerTest {
         when(userService.getOverallScores(eq(testUser), eq(-1)))
                 .thenReturn(failureResponse);
 
-        mockMvc.perform(get("/insession/dailyCheckin/getOverallScores")
+        mockMvc.perform(get("/insession/daily/checkin/getOverallScores")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(getOverallScoresRequest)))
@@ -589,5 +589,120 @@ public class InSessionControllerTest {
         verify(jwtUtil).validateTokenAndGetUserId(validToken);
         verify(userService).getUserById(testUserId);
         verify(userService).getOverallScores(testUser, -1);
+    }
+
+    @Test
+    void testAddMedicationSuccess() throws Exception {
+        AddMedicationRequest addMedicationRequest = new AddMedicationRequest("lisinopril", "10mg", "once daily");
+        AddMedicationResponse successResponse = new AddMedicationResponse(true, "Medication added successfully");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addMedication(eq(testUser), eq("lisinopril"), eq("10mg"), eq("once daily")))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(post("/insession/add/medication")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addMedicationRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Medication added successfully"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addMedication(testUser, "lisinopril", "10mg", "once daily");
+    }
+
+    @Test
+    void testAddMedicationFailure() throws Exception {
+        AddMedicationRequest addMedicationRequest = new AddMedicationRequest("invalidmed", "10mg", "once daily");
+        AddMedicationResponse failureResponse = new AddMedicationResponse(false, "Failed to add medication Database error");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addMedication(eq(testUser), eq("invalidmed"), eq("10mg"), eq("once daily")))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(post("/insession/add/medication")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addMedicationRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Failed to add medication Database error"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addMedication(testUser, "invalidmed", "10mg", "once daily");
+    }
+
+    @Test
+    void testDailyMedLogSuccess() throws Exception {
+        AddMedicationLogRequest addMedicationLogRequest = new AddMedicationLogRequest("lisinopril");
+        AddMedicationLogResponse successResponse = new AddMedicationLogResponse(true, "Medication log added successfully");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addMedicationLog(eq(testUser), eq("lisinopril")))
+                .thenReturn(successResponse);
+
+        mockMvc.perform(post("/insession/daily/medlog")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addMedicationLogRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.success").value(true))
+                .andExpect(jsonPath("$.message").value("Medication log added successfully"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addMedicationLog(testUser, "lisinopril");
+    }
+
+    @Test
+    void testDailyMedLogMedicationNotFound() throws Exception {
+        AddMedicationLogRequest addMedicationLogRequest = new AddMedicationLogRequest("nonexistentmed");
+        AddMedicationLogResponse failureResponse = new AddMedicationLogResponse(false, "Medication not found");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addMedicationLog(eq(testUser), eq("nonexistentmed")))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(post("/insession/daily/medlog")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addMedicationLogRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Medication not found"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addMedicationLog(testUser, "nonexistentmed");
+    }
+
+    @Test
+    void testDailyMedLogFailure() throws Exception {
+        AddMedicationLogRequest addMedicationLogRequest = new AddMedicationLogRequest("lisinopril");
+        AddMedicationLogResponse failureResponse = new AddMedicationLogResponse(false, "Failed to add medication log Database error");
+        
+        when(jwtUtil.validateTokenAndGetUserId(validToken)).thenReturn(testUserId);
+        when(userService.getUserById(testUserId)).thenReturn(Optional.of(testUser));
+        when(userService.addMedicationLog(eq(testUser), eq("lisinopril")))
+                .thenReturn(failureResponse);
+
+        mockMvc.perform(post("/insession/daily/medlog")
+                        .header("Authorization", authHeader)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(addMedicationLogRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.success").value(false))
+                .andExpect(jsonPath("$.message").value("Failed to add medication log Database error"));
+
+        verify(jwtUtil).validateTokenAndGetUserId(validToken);
+        verify(userService).getUserById(testUserId);
+        verify(userService).addMedicationLog(testUser, "lisinopril");
     }
 }
