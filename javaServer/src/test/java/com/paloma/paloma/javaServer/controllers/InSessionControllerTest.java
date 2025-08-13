@@ -390,7 +390,7 @@ public class InSessionControllerTest {
         when(userService.dailyCheckin(eq(testUser), eq(8), eq(7), eq(6), eq(2), eq("Feeling good today")))
                 .thenReturn(successResponse);
 
-        mockMvc.perform(post("/insession/dailyCheckin")
+        mockMvc.perform(post("/insession/daily/checkin")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dailyCheckinRequest)))
@@ -413,7 +413,7 @@ public class InSessionControllerTest {
         when(userService.dailyCheckin(eq(testUser), eq(12), eq(7), eq(6), eq(2), eq("Invalid mood score")))
                 .thenReturn(failureResponse);
 
-        mockMvc.perform(post("/insession/dailyCheckin")
+        mockMvc.perform(post("/insession/daily/checkin")
                         .header("Authorization", authHeader)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(dailyCheckinRequest)))

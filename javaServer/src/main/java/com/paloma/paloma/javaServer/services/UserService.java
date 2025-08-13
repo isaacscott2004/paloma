@@ -289,6 +289,20 @@ public class UserService {
             DailyCheckin dailyCheckin = new DailyCheckin(user, LocalDate.now(), moodScore,
                     energyScore, motivationScore, suicidalScore, notes);
             dailyCheckinRepository.save(dailyCheckin);
+            
+            // Create medication logs for all active medications
+            List<Medication> activeMedications = medicationRepository.findByUserIdAndIsActiveTrue(user.getId());
+            for (Medication medication : activeMedications) {
+                MedLog medLog = new MedLog();
+                medLog.setUser(user);
+                medLog.setMedication(medication);
+                medLog.setDate(LocalDate.now());
+                medLog.setTaken(true);
+                medLog.setCreatedAt(LocalDateTime.now());
+                medLogRepository.save(medLog);
+                medication.addMedLog(medLog);
+            }
+            
             return new DailyCheckinResponse(true, "Daily checkin recorded successfully");
         } catch (Exception e) {
             return new DailyCheckinResponse(false, e.getMessage());
@@ -379,6 +393,19 @@ public class UserService {
             trustedContact.setContactUser(contactUser);
             trustedContact.setMessageOnNotify(messageOnNotify);
             trustedContactRepository.save(trustedContact);
+
+            // Create medication logs for all active medications
+            List<Medication> activeMedications = medicationRepository.findByUserIdAndIsActiveTrue(user.getId());
+            for (Medication medication : activeMedications) {
+                MedLog medLog = new MedLog();
+                medLog.setUser(user);
+                medLog.setMedication(medication);
+                medLog.setDate(LocalDate.now());
+                medLog.setTaken(true);
+                medLog.setCreatedAt(LocalDateTime.now());
+                medLogRepository.save(medLog);
+                medication.addMedLog(medLog);
+            }
 
             return new AddContactResponse(true, "Contact added successfully", true);
         } catch (Exception e) {
