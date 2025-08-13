@@ -36,6 +36,7 @@ public class DbClearService {
         // First, clear entities that depend on other entities (child tables)
         // Delete alerts before trusted contacts since alerts reference trusted contacts
         alertRepository.deleteAll();
+        medLogRepository.deleteAll();
         
         // Delete other child entities
         refreshAuthRepository.deleteAll();
@@ -43,19 +44,12 @@ public class DbClearService {
         userRoleRepository.deleteAll();
         dailyCheckinRepository.deleteAll();
         trustedContactRepository.deleteAll();
+        medicationRepository.deleteAll();
         
         // Then clear parent entities
         userRepository.deleteAll();
         roleRepository.deleteAll();
-        
-        // The following repositories may not have been fully implemented yet
-        // If they are implemented in the future, this method should be updated to include them
-        // in the appropriate order based on their dependencies.
-        //
-        // dailyCheckinRepository
-        // medLogRepository
-        // medicationRepository
-        // scoreHistoryRepository
+
         
         // Log a message indicating that the database has been cleared
         System.out.println("Database cleared successfully at " + java.time.LocalDateTime.now());

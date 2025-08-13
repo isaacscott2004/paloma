@@ -224,7 +224,7 @@ public class InSessionController {
 
     }
 
-    @GetMapping("/daily/checkin/getOverallScores")
+    @PostMapping("/daily/checkin/getOverallScores")
     public ResponseEntity<?> getOverallScores(@RequestHeader("Authorization") String authHeader,
                                               @RequestBody GetOverallScoresRequest getOverallScoresRequest) {
         Integer days = getOverallScoresRequest.getNumberOfDays();

@@ -139,7 +139,7 @@ function refresh() {
 
 // Check-in & Medications
 function dailyCheckIn() {
-  displayRequest('POST', '/insession/dailyCheckin', {
+  displayRequest('POST', '/insession/daily/checkin', {
     moodScore: 8,
     energyScore: 7,
     motivationScore: 6,
@@ -148,7 +148,7 @@ function dailyCheckIn() {
   });
 }
 function getOverallScores() {
-  displayRequest('GET', '/insession/dailyCheckin/getOverallScores', {
+  displayRequest('POST', '/insession/daily/checkin/getOverallScores', {
     numberOfDays: 7
   });
 }
@@ -156,7 +156,16 @@ function getScore() {
   displayRequest('GET', '/loggedIn');
 }
 function addMedication() {
-  displayRequest('POST', '/loggedIn', { medication: 'medication', amount: 'amount' });
+  displayRequest('POST', '/insession/add/medication', {
+    medicationName: 'Lisinopril',
+    dosage: '10mg',
+    schedule: 'once daily'
+  });
+}
+function dailyMedLog() {
+  displayRequest('POST', '/insession/daily/medlog', {
+    medicationName: 'Lisinopril'
+  });
 }
 function updateMedication() {
   displayRequest('PUT', '/loggedIn', { medication: 'medication', amount: 'amount' });

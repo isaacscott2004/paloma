@@ -64,7 +64,7 @@
     <tr>
         <td class="endpoint" onclick="dailyCheckIn()">
             <div class="method">[POST]</div>
-            <div class="path">/insession/dailyCheckin</div>
+            <div class="path">/insession/daily/checkin</div>
         </td>
         <td>
             <span class="description">Submits a daily check-in with mood, energy, motivation, and suicidal scores</span>
@@ -73,8 +73,8 @@
     </tr>
     <tr>
         <td class="endpoint" onclick="getOverallScores()">
-            <div class="method">[GET]</div>
-            <div class="path">/insession/dailyCheckin/getOverallScores</div>
+            <div class="method">[POST]</div>
+            <div class="path">/insession/daily/checkin/getOverallScores</div>
         </td>
         <td>
             <span class="description">Retrieves overall scores for the specified number of days</span>
@@ -82,23 +82,23 @@
         </td>
     </tr>
     <tr>
-        <td class="endpoint" onclick="getScore()">
-            <div class="method">[GET]</div>
-            <div class="path">/loggedIn</div>
+        <td class="endpoint" onclick="addMedication()">
+            <div class="method">[POST]</div>
+            <div class="path">/insession/add/medication</div>
         </td>
         <td>
-            <span class="description">Gets the cumulative score</span>
-            An authToken is required
+            <span class="description">Adds a new medication to the user's profile</span>
+            An authorization token is required. Requires medicationName, dosage, and schedule.
         </td>
     </tr>
     <tr>
-        <td class="endpoint" onclick="addMedication()">
+        <td class="endpoint" onclick="dailyMedLog()">
             <div class="method">[POST]</div>
-            <div class="path">/loggedIn</div>
+            <div class="path">/insession/daily/medlog</div>
         </td>
         <td>
-            <span class="description">Prompts to add medications they take</span>
-            An authToken is required
+            <span class="description">Logs that a medication was taken today</span>
+            An authorization token is required. Requires medicationName.
         </td>
     </tr>
     <tr>
@@ -118,16 +118,6 @@
         </td>
         <td>
             <span class="description">gets all the medications for the user</span>
-            An authToken is required
-        </td>
-    </tr>
-    <tr>
-        <td class="endpoint" onclick="medications()">
-            <div class="method">[POST]</div>
-            <div class="path">/loggedIn</div>
-        </td>
-        <td>
-            <span class="description">Prompts the user to fill out their daily check-in</span>
             An authToken is required
         </td>
     </tr>
