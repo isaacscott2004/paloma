@@ -8,13 +8,11 @@ import com.paloma.paloma.javaServer.entities.*;
 import com.paloma.paloma.javaServer.entities.enums.RoleType;
 import com.paloma.paloma.javaServer.entities.enums.SensitivityLevel;
 import com.paloma.paloma.javaServer.exceptions.AuthenticationException;
-import com.paloma.paloma.javaServer.exceptions.NoDailyCheckinsFoundException;
 import com.paloma.paloma.javaServer.exceptions.UserException;
 import com.paloma.paloma.javaServer.repositories.*;
 import com.paloma.paloma.javaServer.utilites.JwtUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -368,6 +366,28 @@ public class UserService {
 
         } catch (Exception e) {
             return new AddMedicationLogResponse(false, "Failed to add medication log " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public UpdateMedicationResponse updateMedication(User user, String oldMedicationName, String newMedicationName,
+                                                     String dosage, String schedule){
+        try {
+            Optional<Medication> medicationOptional = medicationRepository.findByNameAndUserId(oldMedicationName,
+                    user.getId());
+            if(medicationOptional.isPresent()){
+                Medication medication = medicationOptional.get();
+                medication.setName(newMedicationName);
+                medication.setDosage(dosage);
+                medication.setDailySchedule(schedule);
+                medicationRepository.save(medication);
+                return new UpdateMedicationResponse(true, "Medication Updated successfully");
+            } else{
+                return new UpdateMedicationResponse(false, "Medication not found");
+            }
+
+        }catch (Exception e) {
+            return new UpdateMedicationResponse(false, "Failed to update medication " + e.getMessage());
         }
     }
 

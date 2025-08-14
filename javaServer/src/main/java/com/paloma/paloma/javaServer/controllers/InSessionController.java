@@ -260,6 +260,25 @@ public class InSessionController {
         });
     }
 
+    @PostMapping("/update/medication")
+    public ResponseEntity<?> updateMedication(@RequestHeader("Authorization") String authHeader,
+                                              @RequestBody UpdateMedicationRequest updateMedicationRequest) {
+        String oldMedicationName = updateMedicationRequest.getOldMedicationName();
+        String newMedicationName = updateMedicationRequest.getNewMedicationName();
+        String dosage = updateMedicationRequest.getDosage();
+        String schedule = updateMedicationRequest.getSchedule();
+        return executeWithUser(authHeader, user -> {
+            UpdateMedicationResponse response = userService.updateMedication(user, oldMedicationName,
+                    newMedicationName, dosage, schedule);
+            if(response.isSuccess()){
+                return ResponseEntity.ok(response);
+            } else{
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            }
+        });
+    }
+
+
     @PostMapping("/daily/medlog")
     public ResponseEntity<?> dailyMedLog(@RequestHeader("Authorization") String authHeader,
                                          @RequestBody AddMedicationLogRequest addMedicationLogRequest) {
@@ -273,6 +292,7 @@ public class InSessionController {
             }
         });
     }
+
 
     /**
      * Retrieves a user by their ID from a JWT token.
