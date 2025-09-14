@@ -24,7 +24,7 @@ captures
 /out/
 
 # === Secret Configs (Spring Boot) ===
-/javaServer/src/main/resources/application.properties
+**/application.properties
 
 # === Environment & credentials ===
 .env
