@@ -1,3 +1,4 @@
+# IntelliJ / Android / Kotlin / Gradle
 *.iml
 .kotlin
 .gradle
@@ -10,11 +11,24 @@ local.properties
 captures
 .externalNativeBuild
 .cxx
+
+# Xcode
 *.xcodeproj/*
 !*.xcodeproj/project.pbxproj
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
 **/xcshareddata/WorkspaceSettings.xcsettings
+
 # IntelliJ output directory
 /out/
+
+# === Secret Configs (Spring Boot) ===
+/javaServer/src/main/resources/application.properties
+
+# === Environment & credentials ===
+.env
+*.key
+*.pem
+*.crt
+*.keystore
